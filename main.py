@@ -1,5 +1,5 @@
-from DJITelloPy.djitellopy import Tello
-from DJITelloPy.djitellopy import TelloException
+from DJITelloPy import Tello
+from DJITelloPy import TelloException
 
 tello = Tello()
 
