@@ -1,8 +1,17 @@
 import time, cv2
 from threading import Thread
+import logging
 
 from djitellopy import Tello, BackgroundFrameRead
 from djitellopy import TelloException
+
+HANDLER = logging.StreamHandler()
+FORMATTER = logging.Formatter('[%(levelname)s] %(filename)s - %(lineno)d - %(message)s')
+HANDLER.setFormatter(FORMATTER)
+
+LOGGER = logging.getLogger('main')
+LOGGER.addHandler(HANDLER)
+LOGGER.setLevel(logging.INFO)
 
 
 def main() -> None:
@@ -22,6 +31,7 @@ def main() -> None:
             tello.move_forward(20)
             tello.rotate_clockwise(90)
             cv2.imwrite("picture.png", frame_read.frame)
+            LOGGER.info("Picture saved")
     except TelloException as e:
         print(e)
     finally:
@@ -46,6 +56,7 @@ class VideoRecorder:
             time.sleep(1 / 30)
 
         video.release()
+        LOGGER.info("Video saved")
 
 
 if __name__ == "__main__":
