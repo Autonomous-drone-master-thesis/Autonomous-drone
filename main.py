@@ -1,62 +1,75 @@
-import time, cv2
-from threading import Thread
+import time
+import cv2
 import logging
+from threading import Thread
+from djitellopy import Tello
 
-from djitellopy import Tello, BackgroundFrameRead
-from djitellopy import TelloException
-
-HANDLER = logging.StreamHandler()
-FORMATTER = logging.Formatter('[%(levelname)s] %(filename)s - %(lineno)d - %(message)s')
-HANDLER.setFormatter(FORMATTER)
-
-LOGGER = logging.getLogger('main')
-LOGGER.addHandler(HANDLER)
-LOGGER.setLevel(logging.INFO)
-
-
-def main() -> None:
-    tello = Tello()
-
-    try:
-        tello.connect()
-        tello.streamon()
-        frame_read = tello.get_frame_read()
-        
-        video = VideoRecorder(frame_read)
-        recorder = Thread(target=video.start)
-        recorder.start()
-        
-        tello.takeoff()
-        for _ in range(4):
-            tello.move_forward(20)
-            tello.rotate_clockwise(90)
-            cv2.imwrite("picture.png", frame_read.frame)
-            LOGGER.info("Picture saved")
-    except TelloException as e:
-        print(e)
-    finally:
-        tello.land()
-        
-        video.keepRecording = False
-        recorder.join()
+logger = logging.getLogger('main')
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('[%(levelname)s] %(filename)s - %(lineno)d - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 class VideoRecorder:
-    
-    def __init__(self, frame_read: BackgroundFrameRead) -> None:
-        self.frame_read = frame_read
-        self.keepRecording = True
-        self.video = None
-        
-    def start(self) -> None:
-        height, width, _ = self.frame_read.frame.shape
-        video = cv2.VideoWriter('video.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
+    def __init__(self, drone):
+        self.drone = drone
+        self.frame_read = self.drone.get_frame_read()
+        self.video_filename = 'video.avi'
+        self.recording = False
+        self.video_writer = None
 
-        while self.keepRecording:
-            video.write(self.frame_read.frame)
+    def start_recording(self):
+        self.recording = True
+        height, width, _ = self.frame_read.frame.shape
+        self.video_writer = cv2.VideoWriter(self.video_filename, cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
+        self.recorder_thread = Thread(target=self.record)
+        logger.info('Start recording video to %s', self.video_filename)
+        self.recorder_thread.start()
+
+    def stop_recording(self):
+        self.recording = False
+        logger.info('Stop recording video to %s', self.video_filename)
+        if self.recorder_thread.is_alive():
+            self.recorder_thread.join()
+        if self.video_writer is not None:
+            self.video_writer.release()
+            self.video_writer = None
+
+    def record(self):
+        while self.recording:
+            self.video_writer.write(self.frame_read.frame)
             time.sleep(1 / 30)
 
-        video.release()
-        LOGGER.info("Video saved")
+def main():
+    tello = Tello()
+    tello.connect()
+
+    video_recorder = VideoRecorder(tello)
+
+    try:
+        tello.streamon()
+
+        # Start recording
+        video_recorder.start_recording()
+
+        tello.takeoff()
+
+        tello.move_up(100)
+
+        tello.rotate_counter_clockwise(360)
+        
+        tello.land()
+
+    except Exception as e:
+        logger.error('Error: %s', e)
+
+    finally:
+        # Stop recording
+        video_recorder.stop_recording()
+
+        tello.streamoff()
+        tello.end()
 
 
 if __name__ == "__main__":
