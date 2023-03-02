@@ -10,12 +10,14 @@ from tensorflow.python.keras.utils.data_utils import get_file
 
 
 class ObjectDetector(BaseDetector):
-    def __init__(self, threshold: float = 0.5) -> None:
+    def __init__(self, threshold: float = 0.5, human: bool = False) -> None:
         """
         Initialize the ObjectDetector object with the given threshold.
         :param threshold: the minimum confidence score for a detected object to be considered valid
+        :param human: whether to detect only humans or not
         """
         super().__init__(threshold)
+        self.human = human
         self.classes_list, self.color_list = self._read_classes()
 
     def download_model(self, model_url: str) -> None:
@@ -129,18 +131,20 @@ class ObjectDetector(BaseDetector):
         """
         if len(bbox_idx) != 0:
             for i in bbox_idx:
-                bbox = tuple(bboxs[i].tolist())
-                confidence = round(100 * class_scores[i], 2)
                 index = class_indexes[i]
+                class_name = self.classes_list[index]
+                if not self.human or class_name == "person":
+                    bbox = tuple(bboxs[i].tolist())
+                    confidence = round(100 * class_scores[i], 2)
+                    
+                    label = f"{class_name} {confidence}%".upper()
+                    color = self.color_list[index]
 
-                label = f"{self.classes_list[index]} {confidence}%".upper()
-                color = self.color_list[index]
+                    ymin, xmin, ymax, xmax = bbox
 
-                ymin, xmin, ymax, xmax = bbox
+                    ymin, xmin, ymax, xmax = int(ymin * H), int(xmin * W), int(ymax * H), int(xmax * W)
 
-                ymin, xmin, ymax, xmax = int(ymin * H), int(xmin * W), int(ymax * H), int(xmax * W)
-
-                cv2.rectangle(img, (xmin, ymin), (xmax, ymax), color, 2)
-                cv2.putText(img, label, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                    cv2.rectangle(img, (xmin, ymin), (xmax, ymax), color, 2)
+                    cv2.putText(img, label, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
         return img
