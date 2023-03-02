@@ -13,7 +13,7 @@ video_path = "video.mp4"
 
 threshold = 0.5
 
-detector = ObjectDetector(threshold)
+detector = ObjectDetector(threshold, True)
 detector.download_model(model_path)
 detector.load_model()
 detector.predict_video(video_path)

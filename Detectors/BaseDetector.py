@@ -70,7 +70,7 @@ class BaseDetector(abc.ABC):
             start_time = current_time
 
             img = self._predict(img)
-            
+
             # Add the FPS to the image and display it
             cv2.putText(img, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             cv2.imshow("Face detection", img)
@@ -106,11 +106,11 @@ class BaseDetector(abc.ABC):
         """
         # Set the image to read-only mode to improve performance
         img.flags.writeable = False
-        
+
         results = self._model_process(self._preprocess_image(img))
-        
+
         # Set the image back to writeable mode
-        img.flags.writeable = True   
-        
+        img.flags.writeable = True
+
         img = self._visualize_bounding_box(img, results)
-        return img 
+        return img
