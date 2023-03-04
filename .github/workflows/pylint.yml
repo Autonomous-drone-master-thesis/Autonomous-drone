@@ -37,6 +37,10 @@ jobs:
           path: pylint_report.html
       - name: Update Pylint score badge
         run: |
-          pylint_score=$(cat pylint_report.json | jq '.global_note')
-          sed -i "s|\(Pylint Score.*\)\(https://img.shields.io/badge/Pylint%20Score-\)[^-]*-\([^-]*\)-.*|\1\2$pylint_score-\3-red.svg|" README.md
+          if [ -s pylint_report.json ]; then
+            pylint_score=$(cat pylint_report.json | jq '.global_note')
+            sed -i "s|\(Pylint Score.*\)\(https://img.shields.io/badge/Pylint%20Score-\)[^-]*-\([^-]*\)-.*|\1\2$pylint_score-\3-red.svg|" README.md
+          else
+            echo "No Pylint errors found"
+          fi
         shell: bash
