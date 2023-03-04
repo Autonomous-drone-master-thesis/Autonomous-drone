@@ -18,7 +18,7 @@ jobs:
         shell: bash
       - name: Run pylint
         run: |
-          pylint --output-format=json --ignore=djitellopy/*.py ./**/*.py > pylint_report.json || true
+          pylint --output-format=json ./**/*.py > pylint_report.json || true
           pylint_score=$(pylint --score y ./**/*.py || true)
           echo "::set-output name=pylint_score::$pylint_score"
           if [ -s pylint_report.json ]; then
