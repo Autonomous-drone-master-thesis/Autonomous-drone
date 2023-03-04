@@ -6,7 +6,7 @@ try:
 except ImportError:
     np = None
 
-from .handlers import TelloHandler
+from handlers import TelloHandler
 
 
 class FaceTracker:
