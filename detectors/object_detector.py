@@ -163,29 +163,23 @@ class ObjectDetector(BaseDetector):
         :param width: the width of the input image
         :return: the image with the bounding boxes and class names added
         """
-        if len(bbox_idx) != 0:
-            for box in bbox_idx:
-                index = class_indexes[box]
-                class_name = self.classes_list[index]
-                if not self.human or class_name == "person":
-                    bbox = tuple(bboxs[box].tolist())
-                    confidence = round(100 * class_scores[box], 2)
+        def get_label_and_color(index):
+            class_name = self.classes_list[index]
+            if not self.human or class_name == "person":
+                confidence = round(100 * class_scores[box], 2)
+                return (f"{class_name} {confidence}%".upper(), self.color_list[index])
+            else:
+                return (None, None)
+        
+        for box in bbox_idx:
+            label, color = get_label_and_color(class_indexes[box])
+            if label and color:
+                bbox = tuple(bboxs[box].tolist())
+                bbox = [int(box * size) for box, size in zip(bbox, (height, width, height, width))]
 
-                    label = f"{class_name} {confidence}%".upper()
-                    color = self.color_list[index]
-
-                    ymin, xmin, ymax, xmax = bbox
-
-                    ymin, xmin, ymax, xmax = (
-                        int(ymin * height),
-                        int(xmin * width),
-                        int(ymax * height),
-                        int(xmax * width),
-                    )
-
-                    cv2.rectangle(img, (xmin, ymin), (xmax, ymax), color, 2)
-                    cv2.putText(
-                        img, label, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
-                    )
+                cv2.rectangle(img, bbox[:2], bbox[2:], color, 2)
+                cv2.putText(
+                    img, label, (bbox[0], bbox[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
+                )
 
         return img

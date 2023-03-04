@@ -1,6 +1,6 @@
 import logging
 
-from Detectors import FaceDetector
+from detectors import FaceDetector
 
 logging.basicConfig(level=logging.INFO)
 video_path = 0

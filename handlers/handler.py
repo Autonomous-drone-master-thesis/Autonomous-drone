@@ -1,8 +1,11 @@
 """Module for the TelloHandler class."""
-from djitellopy import Tello
+try:
+    from djitellopy import tello
+except ImportError:
+    tello = None
 
 
-class TelloHandler(Tello):
+class TelloHandler(tello):
     """TelloHandler class is a wrapper class for the Tello class from the djitellopy library."""
 
     def connect_and_initiate(self) -> None:

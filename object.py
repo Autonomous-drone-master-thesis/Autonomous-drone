@@ -1,6 +1,6 @@
 import logging
 
-from Detectors import ObjectDetector
+from detectors import ObjectDetector
 
 logging.basicConfig(level=logging.INFO)
 
@@ -9,7 +9,7 @@ model_path = (
 )
 
 video_path = 0
-video_path = "video.mp4"
+#video_path = "video.mp4"
 
 threshold = 0.5
 
