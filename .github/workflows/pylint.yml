@@ -1,24 +1,33 @@
-name: Python Code Quality and Lint
+name: Pylint
 
 on:
   push:
     branches:
-      - main
+      - '*'
 
 jobs:
-  lint:
-    name: Python Code Quality and Lint
+  pylint:
+    name: Pylint
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Python Code Quality and Lint
-      uses: ricardochaves/python-lint@v1.3.0
+    - name: Install dependencies
+      run: |
+        pip install pylint pylint-json2html
+      shell: bash
+    - name: Run pylint
+      run: |
+        pylint --output-format=json ./**/*.py > pylint_report.json
+        pylint_score=$(pylint --score y ./**/*.py)
+        echo "::set-output name=pylint_score::$pylint_score"
+      shell: bash
+    - name: Convert Pylint output to HTML
+      run: |
+        pylint-json2html -f json -o pylint_report.html pylint_report.json
+      shell: bash
+    - name: Upload Pylint report as an artifact
+      uses: actions/upload-artifact@v2
       with:
-        python-root-list: .
-        use-pylint: true
-        use-pycodestyle: true
-        use-flake8: true
-        use-black: true
-        use-mypy: true
-        use-isort: true
+        name: Pylint report
+        path: pylint_report.html
