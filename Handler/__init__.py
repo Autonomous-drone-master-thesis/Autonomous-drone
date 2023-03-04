@@ -1,1 +1,1 @@
-from .Handler import TelloHandler
+from .handler import TelloHandler

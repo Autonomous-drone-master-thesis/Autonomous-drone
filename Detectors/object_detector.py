@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.utils.data_utils import get_file
 
-from .BaseDetector import BaseDetector
+from .base_detector import BaseDetector
 
 
 class ObjectDetector(BaseDetector):

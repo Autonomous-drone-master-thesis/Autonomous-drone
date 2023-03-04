@@ -1,1 +1,1 @@
-from .FaceTracker import FaceTracker
+from .face_tracker import FaceTracker

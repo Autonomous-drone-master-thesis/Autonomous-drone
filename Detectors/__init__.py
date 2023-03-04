@@ -1,2 +1,2 @@
-from .FaceDetector import FaceDetector
-from .ObjectDetector import ObjectDetector
+from .face_detector import FaceDetector
+from .object_detector import ObjectDetector

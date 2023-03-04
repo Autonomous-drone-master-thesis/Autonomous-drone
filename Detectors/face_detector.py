@@ -4,7 +4,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
-from .BaseDetector import BaseDetector
+from .base_detector import BaseDetector
 
 
 class FaceDetector(BaseDetector):
