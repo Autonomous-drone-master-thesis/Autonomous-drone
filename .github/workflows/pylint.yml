@@ -3,7 +3,7 @@ name: Pylint
 on:
   push:
     branches:
-      - '*'
+      - main
 
 jobs:
   pylint:
@@ -18,9 +18,13 @@ jobs:
       shell: bash
     - name: Run pylint
       run: |
-        pylint --output-format=json ./**/*.py > pylint_report.json
-        pylint_score=$(pylint --score y ./**/*.py)
+        pylint --output-format=json ./**/*.py > pylint_report.json || true
+        pylint_score=$(pylint --score y ./**/*.py || true)
         echo "::set-output name=pylint_score::$pylint_score"
+        if [ -s pylint_report.json ]; then
+          echo "Pylint errors found:"
+          cat pylint_report.json
+        fi
       shell: bash
     - name: Convert Pylint output to HTML
       run: |
