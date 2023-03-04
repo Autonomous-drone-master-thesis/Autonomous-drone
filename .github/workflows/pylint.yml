@@ -1,0 +1,24 @@
+name: Python Code Quality and Lint
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Python Code Quality and Lint
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Python Code Quality and Lint
+      uses: ricardochaves/python-lint@v1.3.0
+      with:
+        python-root-list: .
+        use-pylint: true
+        use-pycodestyle: true
+        use-flake8: true
+        use-black: true
+        use-mypy: true
+        use-isort: true
