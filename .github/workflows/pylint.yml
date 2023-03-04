@@ -38,7 +38,7 @@ jobs:
       - name: Update Pylint score badge
         run: |
           if [ -s pylint_report.json ]; then
-            pylint_score=$(cat pylint_report.json | jq '.header.items[0].value' | cut -d '/' -f 1 | sed 's/[[:space:]]//g')
+            pylint_score=$(cat pylint_report.json | jq '.body[0].columns[1].value' | cut -d '/' -f 1 | sed 's/[[:space:]]//g')
             sed -i "s|\(Pylint Score.*\)\(https://img.shields.io/badge/Pylint%20Score-\)[^-]*-\([^-]*\)-.*|\1\2$pylint_score-\3-red.svg|" README.md
           else
             echo "No Pylint errors found"
