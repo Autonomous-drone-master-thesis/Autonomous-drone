@@ -1,3 +1,5 @@
+"""Module containing the BaseDetector class."""
+
 import abc
 import logging
 import time
@@ -10,7 +12,6 @@ except ImportError:
     cv2 = None
     np = None
 
-"""Module containing the BaseDetector class."""
 
 class BaseDetector(abc.ABC):
     """Base class for all detection models."""
@@ -26,13 +27,13 @@ class BaseDetector(abc.ABC):
     @abc.abstractmethod
     def load_model(self) -> None:
         """
-        Abstract method for loading the object detection model. Must be implemented in any class inheriting from BaseDetector.
+        Abstract method for loading the object detection model.
         """
 
     @abc.abstractmethod
     def _preprocess_image(self, img: np.ndarray) -> np.ndarray:
         """
-        Abstract method for preprocessing the input image. Must be implemented in any class inheriting from BaseDetector.
+        Abstract method for preprocessing the input image.
         :param img: the input image to be preprocessed
         :return: the preprocessed image
         """
@@ -40,7 +41,7 @@ class BaseDetector(abc.ABC):
     @abc.abstractmethod
     def _visualize_bounding_box(self, img: np.ndarray, detections: Any) -> np.ndarray:
         """
-        Abstract method for visualizing the bounding boxes around the detected objects. Must be implemented in any class inheriting from BaseDetector.
+        Abstract method for visualizing the bounding boxes around the detected objects.
         :param img: the input image with the detected objects
         :param detections: the object detection results
         :return: the image with the bounding boxes added
@@ -49,7 +50,7 @@ class BaseDetector(abc.ABC):
     @abc.abstractmethod
     def _model_process(self, img: np.ndarray) -> Any:
         """
-        Abstract method for performing the object detection. Must be implemented in any class inheriting from BaseDetector.
+        Abstract method for performing the object detection.
         :param img: the preprocessed input image
         :return: the object detection results
         """
@@ -76,7 +77,9 @@ class BaseDetector(abc.ABC):
             print(middle, area)
 
             # Add the FPS to the image and display it
-            cv2.putText(img, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(
+                img, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2
+            )
             cv2.imshow("Face detection", img)
 
             # Wait for the "q" key to be pressed
@@ -90,7 +93,8 @@ class BaseDetector(abc.ABC):
 
     def _initiate_video_writer(self, video: Union[int, str]) -> cv2.VideoCapture:
         """
-        Open a video file or camera stream using the OpenCV library and return the VideoCapture instance.
+        Open a video file or camera stream using the OpenCV library
+        and return the VideoCapture instance.
         :param video: the path to the video file or the index of the camera device
         :return: the VideoCapture instance
         """
