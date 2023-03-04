@@ -10,35 +10,33 @@ jobs:
     name: Pylint
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Install dependencies
-      run: |
-        pip install pylint pylint-json2html
-      shell: bash
-    - name: Run pylint
-      run: |
-        pylint --output-format=json ./**/*.py > pylint_report.json || true
-        pylint_score=$(pylint --score y ./**/*.py || true)
-        echo "::set-output name=pylint_score::$pylint_score"
-        if [ -s pylint_report.json ]; then
-          echo "Pylint errors found:"
-          cat pylint_report.json
-        fi
-      shell: bash
-    - name: Convert Pylint output to HTML
-      run: |
-        pylint-json2html -f json -o pylint_report.html pylint_report.json
-      shell: bash
-    - name: Upload Pylint report as an artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: Pylint report
-        path: pylint_report.html
-    - name: Display Pylint score as a badge
-      uses: actions-ecosystem/action-readme-badges@v2.1.2
-      with:
-        text: Pylint Score
-        message: ${{ steps.pylint.outputs.pylint_score }}
-        color: ${{ steps.pylint.outputs.pylint_score > 9 && 'green' || steps.pylint.outputs.pylint_score > 7 && 'yellow' || 'red' }}
-        style: plastic
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          pip install pylint pylint-json2html
+        shell: bash
+      - name: Run pylint
+        run: |
+          pylint --output-format=json ./**/*.py > pylint_report.json || true
+          pylint_score=$(pylint --score y ./**/*.py || true)
+          echo "::set-output name=pylint_score::$pylint_score"
+          if [ -s pylint_report.json ]; then
+            echo "Pylint errors found:"
+            cat pylint_report.json
+          fi
+        shell: bash
+      - name: Convert Pylint output to HTML
+        run: |
+          pylint-json2html -f json -o pylint_report.html pylint_report.json
+        shell: bash
+      - name: Upload Pylint report as an artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Pylint report
+          path: pylint_report.html
+      - name: Update Pylint score badge
+        run: |
+          pylint_score=$(cat pylint_report.json | jq '.global_note')
+          sed -i "s|\(Pylint Score.*\)\(https://img.shields.io/badge/Pylint%20Score-\)[^-]*-\([^-]*\)-.*|\1\2$pylint_score-\3-red.svg|" README.md
+        shell: bash
