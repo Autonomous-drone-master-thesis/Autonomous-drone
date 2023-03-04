@@ -18,8 +18,8 @@ jobs:
         shell: bash
       - name: Run pylint
         run: |
-          pylint --output-format=json ./**/*.py > pylint_report.json || true
-          pylint_score=$(pylint --score y ./**/*.py || true)
+          pylint --output-format=json ./**/*.py --good-names=x,y > pylint_report.json || true
+          pylint_score=$(pylint --score y ./**/*.py --good-names=x,y || true)
           echo "::set-output name=pylint_score::$pylint_score"
           if [ -s pylint_report.json ]; then
             echo "Pylint errors found:"

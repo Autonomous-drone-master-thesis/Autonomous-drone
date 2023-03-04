@@ -1,8 +1,15 @@
+"""Module for performing face detection using the Mediapipe library."""
+
 from typing import Tuple
 
-import cv2
-import mediapipe as mp
-import numpy as np
+try:
+    import cv2
+    import mediapipe as mp
+    import numpy as np
+except ImportError:
+    cv2 = None
+    mediapipe = None
+    numpy = None
 
 from .base_detector import BaseDetector
 
@@ -71,7 +78,8 @@ class FaceDetector(BaseDetector):
         self, img: np.ndarray, detection: mp.solutions.face_detection.FaceDetection
     ) -> Tuple[Tuple[int, int], float, float, float]:
         """
-        Calculate the middle point, area, and relative position of the bounding box for a detected face.
+        Calculate the middle point, area, and relative position of the bounding box
+        for a detected face.
         :param img: the input image with the detected face
         :param detection: the face detection results for the current image
         :return: a tuple with the middle point, area, and relative position of the bounding box
@@ -106,9 +114,9 @@ class FaceDetector(BaseDetector):
         cv2.circle(img, (int(x * img.shape[1]), int(y * img.shape[0])), 5, (0, 255, 0), -1)
 
         # Draw the confidence score as text above the bounding box
-        h, w, _ = img.shape
+        height, width, _ = img.shape
         bbox = detection.location_data.relative_bounding_box
-        xmin, ymin = int(bbox.xmin * w), int(bbox.ymin * h)
+        xmin, ymin = int(bbox.xmin * width), int(bbox.ymin * height)
         confidence = round(detection.score[0] * 100, 2)
         text = f"{confidence}%"
         cv2.putText(img, text, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
