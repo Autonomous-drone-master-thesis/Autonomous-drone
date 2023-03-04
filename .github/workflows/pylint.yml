@@ -40,5 +40,5 @@ jobs:
       with:
         text: Pylint Score
         message: ${{ steps.pylint.outputs.pylint_score }}
-        color: ${{ if gt(steps.pylint.outputs.pylint_score, 9) }}green${{ else if gt(steps.pylint.outputs.pylint_score, 7) }}yellow${{ else }}red${{ endif }}
+        color: ${{ steps.pylint.outputs.pylint_score > 9 && 'green' || steps.pylint.outputs.pylint_score > 7 && 'yellow' || 'red' }}
         style: plastic
