@@ -9,6 +9,7 @@ except ImportError:
 from handlers import TelloHandler
 
 
+# pylint: disable=R0903
 class FaceTracker:
     """Class for tracking faces."""
 
