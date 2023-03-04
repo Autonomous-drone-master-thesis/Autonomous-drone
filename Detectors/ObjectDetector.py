@@ -13,7 +13,7 @@ from .BaseDetector import BaseDetector
 class ObjectDetector(BaseDetector):
     """Class for performing object detection on videos.
     """
-    def __init__(self, threshold: float = 0.5, human: bool = False, model_url: str) -> None:
+    def __init__(self, model_url: str, threshold: float = 0.5, human: bool = False) -> None:
         """
         Initialize the ObjectDetector object with the given threshold.
         :param threshold: the minimum confidence score for a detected object to be considered valid

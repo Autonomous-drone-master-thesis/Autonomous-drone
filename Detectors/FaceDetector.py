@@ -86,7 +86,11 @@ class FaceDetector(BaseDetector):
         return middle, area, x, y
 
     def _draw_bounding_boxes(
-        self, img: np.ndarray, detection: mp.solutions.face_detection.FaceDetection, x: float, y: float
+        self,
+        img: np.ndarray,
+        detection: mp.solutions.face_detection.FaceDetection,
+        x: float,
+        y: float,
     ) -> None:
         """
         Draw the bounding box and confidence score on the input image for a detected face.

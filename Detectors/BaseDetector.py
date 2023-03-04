@@ -3,9 +3,14 @@ import logging
 import time
 from typing import Union, Any, Tuple
 
-import cv2
-import numpy as np
+try:
+    import cv2
+    import numpy as np
+except ImportError:
+    cv2 = None
+    np = None
 
+"""Module containing the BaseDetector class."""
 
 class BaseDetector(abc.ABC):
     """Base class for all detection models."""
@@ -93,7 +98,7 @@ class BaseDetector(abc.ABC):
         cap = cv2.VideoCapture(video)
         if not cap.isOpened():
             self.logger.error("Cannot open camera")
-            raise Exception("Cannot open camera")
+            raise ValueError("Cannot open camera")
 
         return cap
 
