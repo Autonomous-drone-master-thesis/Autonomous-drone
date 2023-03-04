@@ -1,7 +1,7 @@
 import abc
 import logging
 import time
-from typing import Union, Any
+from typing import Union, Any, Tuple
 
 import cv2
 import numpy as np
@@ -69,7 +69,8 @@ class BaseDetector(abc.ABC):
             fps = 1 / (current_time - start_time)
             start_time = current_time
 
-            img = self._predict(img)
+            img, middle, area = self._predict(img)
+            print(middle, area)
 
             # Add the FPS to the image and display it
             cv2.putText(img, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
@@ -98,7 +99,7 @@ class BaseDetector(abc.ABC):
 
         return cap
 
-    def _predict(self, img: np.ndarray) -> np.ndarray:
+    def _predict(self, img: np.ndarray) -> Tuple[np.ndarray, Tuple[int, int], float]:
         """
         Perform object detection on the input image and return the resulting
         :param img: the input image to perform object detection on
@@ -112,5 +113,5 @@ class BaseDetector(abc.ABC):
         # Set the image back to writeable mode
         img.flags.writeable = True
 
-        img = self._visualize_bounding_box(img, results)
-        return img
+        img, middle, area = self._visualize_bounding_box(img, results)
+        return img, middle, area

@@ -45,19 +45,24 @@ class FaceDetector(BaseDetector):
 
     def _visualize_bounding_box(
         self, img: np.ndarray, results: mp.solutions.face_detection.FaceDetection
-    ) -> np.ndarray:
+    ) -> Tuple[np.ndarray, Tuple[int, int], float]:
         """
         Visualize the bounding boxes around the detected faces.
         :param img: the input image with the detected faces
         :param results: the face detection results
         :return: the image with the bounding boxes added
         """
+        face_centers = []
+        face_areas = []
         if results.detections:
             for detection in results.detections:
                 middle, area, x, y = self._get_box_coordinates(img, detection)
+                face_centers.append(middle)
+                face_areas.append(area)
                 self._draw_bounding_boxes(img, detection, x, y)
-            return img
-        return img
+            closest_face_index = face_areas.index(max(face_areas))
+            return img, face_centers[closest_face_index], face_areas[closest_face_index]
+        return img, (0, 0), 0.0
 
     def _get_box_coordinates(
         self, img: np.ndarray, detection: mp.solutions.face_detection.FaceDetection
