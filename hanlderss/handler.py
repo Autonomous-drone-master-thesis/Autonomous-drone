@@ -1,3 +1,4 @@
+"""Module for the TelloHandler class."""
 from djitellopy import Tello
 
 

@@ -8,8 +8,8 @@ try:
     import numpy as np
 except ImportError:
     cv2 = None
-    mediapipe = None
-    numpy = None
+    mp = None
+    np = None
 
 from .base_detector import BaseDetector
 

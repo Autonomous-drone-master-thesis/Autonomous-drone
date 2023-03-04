@@ -164,12 +164,12 @@ class ObjectDetector(BaseDetector):
         :return: the image with the bounding boxes and class names added
         """
         if len(bbox_idx) != 0:
-            for i in bbox_idx:
-                index = class_indexes[i]
+            for box in bbox_idx:
+                index = class_indexes[box]
                 class_name = self.classes_list[index]
                 if not self.human or class_name == "person":
-                    bbox = tuple(bboxs[i].tolist())
-                    confidence = round(100 * class_scores[i], 2)
+                    bbox = tuple(bboxs[box].tolist())
+                    confidence = round(100 * class_scores[box], 2)
 
                     label = f"{class_name} {confidence}%".upper()
                     color = self.color_list[index]

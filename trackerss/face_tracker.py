@@ -1,8 +1,12 @@
+"""Module for the FaceTracker class."""
 from typing import Tuple
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None
 
-from ..Handler import TelloHandler
+from ..hanlderss import TelloHandler
 
 
 class FaceTracker:
