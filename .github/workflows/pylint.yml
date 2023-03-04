@@ -3,7 +3,7 @@ name: Pylint
 on:
   push:
     branches:
-      - '*'
+      - main
 
 jobs:
   pylint:
@@ -18,12 +18,9 @@ jobs:
         shell: bash
       - name: Run pylint
         run: |
-          pylint --output-format=json ./**/*.py --good-names=x,y > pylint_report.json || true
-          pylint_score=$(pylint --score y ./**/*.py --good-names=x,y || true)
+          pylint --output-format=json ./**/*.py > pylint_report.json || true
+          pylint_score=$(pylint --score y ./**/*.py || true)
           echo "::set-output name=pylint_score::$pylint_score"
-          if [ -s pylint_report.json ]; then
-            echo "Pylint errors found:"
-            cat pylint_report.json
           fi
         shell: bash
       - name: Convert Pylint output to HTML
@@ -35,3 +32,14 @@ jobs:
         with:
           name: Pylint report
           path: pylint_report.html
+      - name: Dynamic Badges
+        # You may pin to the exact commit or the version.
+        # uses: Schneegans/dynamic-badges-action@5d424ad4060f866e4d1dab8f8da0456e6b1c4f56
+        uses: Schneegans/dynamic-badges-action@v1.6.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: f75ffb077874ae17accb0f18037eef5d
+          filename: badge.json
+          label: Pylint
+          message: pylint_score
+          color: green
