@@ -35,3 +35,10 @@ jobs:
       with:
         name: Pylint report
         path: pylint_report.html
+    - name: Display Pylint score as a badge
+      uses: actions-ecosystem/action-readme-badges@v2.1.2
+      with:
+        text: Pylint Score
+        message: ${{ steps.pylint.outputs.pylint_score }}
+        color: ${{ if gt(steps.pylint.outputs.pylint_score, 9) }}green${{ else if gt(steps.pylint.outputs.pylint_score, 7) }}yellow${{ else }}red${{ endif }}
+        style: plastic
