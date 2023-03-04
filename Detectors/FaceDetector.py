@@ -8,14 +8,17 @@ from .BaseDetector import BaseDetector
 
 
 class FaceDetector(BaseDetector):
+    """Class for performing face detection using the Mediapipe library."""
+
     def __init__(self, threshold: float = 0.5):
         """
         Initialize the FaceDetector object with the given threshold.
         :param threshold: the minimum confidence score for a detected face to be considered valid
         """
         super().__init__(threshold)
+        self._load_model()
 
-    def load_model(self) -> None:
+    def _load_model(self) -> None:
         """
         Load the face detection model from the Mediapipe library and initialize the drawing utility.
         """
@@ -44,7 +47,7 @@ class FaceDetector(BaseDetector):
         return img
 
     def _visualize_bounding_box(
-        self, img: np.ndarray, results: mp.solutions.face_detection.FaceDetection
+        self, img: np.ndarray, detections: mp.solutions.face_detection.FaceDetection
     ) -> Tuple[np.ndarray, Tuple[int, int], float]:
         """
         Visualize the bounding boxes around the detected faces.
@@ -54,8 +57,8 @@ class FaceDetector(BaseDetector):
         """
         face_centers = []
         face_areas = []
-        if results.detections:
-            for detection in results.detections:
+        if detections.detections:
+            for detection in detections.detections:
                 middle, area, x, y = self._get_box_coordinates(img, detection)
                 face_centers.append(middle)
                 face_areas.append(area)
@@ -101,9 +104,7 @@ class FaceDetector(BaseDetector):
         # Draw the confidence score as text above the bounding box
         h, w, _ = img.shape
         bbox = detection.location_data.relative_bounding_box
-        xmin, ymin, width, height = int(bbox.xmin * w), int(bbox.ymin * h), int(bbox.width * w), int(bbox.height * h)
-        x_left = xmin
-        y_top = ymin
+        xmin, ymin = int(bbox.xmin * w), int(bbox.ymin * h)
         confidence = round(detection.score[0] * 100, 2)
         text = f"{confidence}%"
-        cv2.putText(img, text, (x_left, y_top - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        cv2.putText(img, text, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)

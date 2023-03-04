@@ -8,6 +8,8 @@ import numpy as np
 
 
 class BaseDetector(abc.ABC):
+    """Base class for all detection models."""
+
     def __init__(self, threshold: float = 0.5) -> None:
         """
         Initialize the BaseDetector object with the given threshold.
@@ -21,7 +23,6 @@ class BaseDetector(abc.ABC):
         """
         Abstract method for loading the object detection model. Must be implemented in any class inheriting from BaseDetector.
         """
-        pass
 
     @abc.abstractmethod
     def _preprocess_image(self, img: np.ndarray) -> np.ndarray:
@@ -30,17 +31,15 @@ class BaseDetector(abc.ABC):
         :param img: the input image to be preprocessed
         :return: the preprocessed image
         """
-        pass
 
     @abc.abstractmethod
-    def _visualize_bounding_box(self, img: np.ndarray, results: Any) -> np.ndarray:
+    def _visualize_bounding_box(self, img: np.ndarray, detections: Any) -> np.ndarray:
         """
         Abstract method for visualizing the bounding boxes around the detected objects. Must be implemented in any class inheriting from BaseDetector.
         :param img: the input image with the detected objects
-        :param results: the object detection results
+        :param detections: the object detection results
         :return: the image with the bounding boxes added
         """
-        pass
 
     @abc.abstractmethod
     def _model_process(self, img: np.ndarray) -> Any:
@@ -49,7 +48,6 @@ class BaseDetector(abc.ABC):
         :param img: the preprocessed input image
         :return: the object detection results
         """
-        pass
 
     def predict_video(self, video: Union[int, str]) -> None:
         """

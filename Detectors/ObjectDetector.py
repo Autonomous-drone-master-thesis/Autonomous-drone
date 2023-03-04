@@ -1,16 +1,19 @@
 import os
 from typing import Dict, Tuple, Any
 
-from .BaseDetector import BaseDetector
 
 import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.utils.data_utils import get_file
 
+from .BaseDetector import BaseDetector
+
 
 class ObjectDetector(BaseDetector):
-    def __init__(self, threshold: float = 0.5, human: bool = False) -> None:
+    """Class for performing object detection on videos.
+    """
+    def __init__(self, threshold: float = 0.5, human: bool = False, model_url: str) -> None:
         """
         Initialize the ObjectDetector object with the given threshold.
         :param threshold: the minimum confidence score for a detected object to be considered valid
@@ -19,8 +22,23 @@ class ObjectDetector(BaseDetector):
         super().__init__(threshold)
         self.human = human
         self.classes_list, self.color_list = self._read_classes()
+        self._download_model(model_url)
+        self._load_model()
+        
+    def _read_classes(self) -> Tuple[list[str], np.ndarray[Any, np.dtype[np.float64]]]:
+        """
+        Read the object classes from the COCO dataset and initialize the color list.
+        :return: a tuple with the list of object classes and the color list
+        """
+        path = "utils/coco.names"
+        with open(path, "rt") as f:
+            classes_list = f.read().rstrip("\n").split("\n")
 
-    def download_model(self, model_url: str) -> None:
+        color_list = np.random.uniform(low=0, high=255, size=(len(classes_list), 3))
+
+        return classes_list, color_list
+
+    def _download_model(self, model_url: str) -> None:
         """
         Download the object detection model from the given URL.
         :param model_url: the URL of the object detection model
@@ -34,7 +52,7 @@ class ObjectDetector(BaseDetector):
         get_file(fname=file_name, origin=model_url, cache_dir=self.cache_dir, cache_subdir="checkpoints", extract=True)
         self.logger.info("Model downloaded")
 
-    def load_model(self) -> None:
+    def _load_model(self) -> None:
         """
         Load the object detection model from the checkpoint directory.
         """
@@ -42,19 +60,6 @@ class ObjectDetector(BaseDetector):
         tf.keras.backend.clear_session()
         self.model = tf.saved_model.load(os.path.join(self.cache_dir, "checkpoints", self.model_name, "saved_model"))
         self.logger.info("Model loaded")
-
-    def _read_classes(self) -> Tuple[list[str], np.ndarray[Any, np.dtype[np.float64]]]:
-        """
-        Read the object classes from the COCO dataset and initialize the color list.
-        :return: a tuple with the list of object classes and the color list
-        """
-        path = "utils/coco.names"
-        with open(path, "rt") as f:
-            classes_list = f.read().rstrip("\n").split("\n")
-
-        color_list = np.random.uniform(low=0, high=255, size=(len(classes_list), 3))
-
-        return classes_list, color_list
 
     def _model_process(self, img):
         """
@@ -85,9 +90,9 @@ class ObjectDetector(BaseDetector):
         """
         bbox_idx, bboxs, class_indexes, class_scores = self._get_bounding_boxes(detections)
 
-        H, W, C = img.shape
+        height, width, _ = img.shape
 
-        img = self._draw_bounding_boxes(img, bbox_idx, bboxs, class_indexes, class_scores, H, W)
+        img = self._draw_bounding_boxes(img, bbox_idx, bboxs, class_indexes, class_scores, height, width)
 
         return img
 
@@ -115,8 +120,8 @@ class ObjectDetector(BaseDetector):
         bboxs: np.ndarray,
         class_indexes: np.ndarray,
         class_scores: np.ndarray,
-        H: int,
-        W: int,
+        height: int,
+        width: int,
     ) -> np.ndarray:
         """
         Draw the bounding boxes around the detected objects and add the class names and confidence scores as text.
@@ -125,8 +130,8 @@ class ObjectDetector(BaseDetector):
         :param bboxs: the bounding boxes themselves
         :param class_indexes: the class indexes
         :param class_scores: the class scores
-        :param H: the height of the input image
-        :param W: the width of the input image
+        :param height: the height of the input image
+        :param width: the width of the input image
         :return: the image with the bounding boxes and class names added
         """
         if len(bbox_idx) != 0:
@@ -142,7 +147,7 @@ class ObjectDetector(BaseDetector):
 
                     ymin, xmin, ymax, xmax = bbox
 
-                    ymin, xmin, ymax, xmax = int(ymin * H), int(xmin * W), int(ymax * H), int(xmax * W)
+                    ymin, xmin, ymax, xmax = int(ymin * height), int(xmin * width), int(ymax * height), int(xmax * width)
 
                     cv2.rectangle(img, (xmin, ymin), (xmax, ymax), color, 2)
                     cv2.putText(img, label, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
