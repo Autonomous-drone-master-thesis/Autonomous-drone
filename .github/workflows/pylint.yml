@@ -26,14 +26,9 @@ jobs:
           if [[ "${pylint_score}" =~ $score_regex ]]; then
             score="${BASH_REMATCH[1]}"
             echo "score=${score}" >> $GITHUB_OUTPUT
-            echo "${score}"
           else
             echo "Unable to extract Pylint score from '${pylint_score}'"
           fi
-        shell: bash
-      - name: Debug
-        run: |
-          echo "${{ steps.pylint.outputs.score }}"
         shell: bash
       - name: Convert Pylint output to HTML
         run: |
