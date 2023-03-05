@@ -33,7 +33,7 @@ jobs:
         shell: bash
       - name: Debug
         run: |
-          echo "${{ steps.pylint.outputs.score }}
+          echo "${{ steps.pylint.outputs.score }}"
         shell: bash
       - name: Convert Pylint output to HTML
         run: |
