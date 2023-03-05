@@ -38,7 +38,7 @@ jobs:
           gistID: f75ffb077874ae17accb0f18037eef5d
           filename: badge.json
           label: Pylint
-          message: '${{ steps.pylint.outputs.pylint_score }}'
-          valColorRange: ${{ steps.pylint.outputs.pylint_score }}
+          message: ${{ steps.run_pylint.outputs.pylint_score }}
+          valColorRange: ${{ steps.run_pylint.outputs.pylint_score }}
           maxColorRange: 10
           minColorRange: 8
