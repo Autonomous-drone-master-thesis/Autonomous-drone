@@ -21,7 +21,10 @@ jobs:
         run: |
           pylint --output-format=json ./**/*.py --good-names=x,y > pylint_report.json || true
           pylint_score=$(pylint --score y ./**/*.py --good-names=x,y || true)
-          echo "{pylint_score}=${pylint_score}" >> $GITHUB_OUTPUT
+          if [ -s pylint_report.json ]; then
+            echo "Pylint errors found:"
+            cat pylint_report.json
+          fi
         shell: bash
       - name: Convert Pylint output to HTML
         run: |
