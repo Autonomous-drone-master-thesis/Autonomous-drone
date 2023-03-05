@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
       - name: Install dependencies
         run: |
           pip install pylint pylint-json2html
@@ -21,17 +21,14 @@ jobs:
         run: |
           pylint --output-format=json --score no ./**/*.py --good-names=x,y > pylint_report.json || true
           pylint_score=$(pylint --score y ./**/*.py --good-names=x,y || true)
+          echo "${pylint_score}"
         shell: bash
       - name: Convert Pylint output to HTML
         run: |
           pylint-json2html -f json -o pylint_report.html pylint_report.json
         shell: bash
-      - name: Debug
-        run: |
-          echo "pylint_score = '${{ steps.pylint.outputs.pylint_score }}'"
-        shell: bash
       - name: Upload Pylint report as an artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: Pylint report
           path: pylint_report.html
