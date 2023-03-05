@@ -27,19 +27,13 @@ jobs:
         run: |
           pylint-json2html -f json -o pylint_report.html pylint_report.json
         shell: bash
+      - name: Debug
+        run: |
+          echo "pylint_score = '${{ steps.pylint.outputs.pylint_score }}'"
+        shell: bash
       - name: Upload Pylint report as an artifact
         uses: actions/upload-artifact@v2
         with:
           name: Pylint report
           path: pylint_report.html
-      - name: Dynamic Badges
-        uses: Schneegans/dynamic-badges-action@v1.6.0
-        with:
-          auth: ${{ secrets.GIST_SECRET }}
-          gistID: f75ffb077874ae17accb0f18037eef5d
-          filename: badge.json
-          label: Pylint
-          message: '${{ steps.pylint.outputs.pylint_score }}'
-          valColorRange: '${{ steps.pylint.outputs.pylint_score }}'
-          maxColorRange: 10
-          minColorRange: 8
+      
