@@ -16,11 +16,12 @@ jobs:
         run: |
           pip install pylint pylint-json2html
         shell: bash
-      - name: pylint
+      - name: Run pylint
+        id: pylint
         run: |
           pylint --output-format=json ./**/*.py --good-names=x,y > pylint_report.json || true
-          pylint_score=$(pylint --score y ./**/*.py --good-names=x,y --exit-zero || true)
-          echo "SCORE=${pylint_score}" >> $GITHUB_ENV
+          pylint_score=$(pylint --score y ./**/*.py --good-names=x,y || true)
+          echo "::set-output name=pylint_score::${pylint_score}"
         shell: bash
       - name: Convert Pylint output to HTML
         run: |
@@ -38,7 +39,7 @@ jobs:
           gistID: f75ffb077874ae17accb0f18037eef5d
           filename: badge.json
           label: Pylint
-          message: ${{ env.SCORE }}
-          valColorRange: ${{ env.SCORE }}
+          message: ${{ steps.pylint.outputs.pylint_score }}
+          valColorRange: ${{ steps.pylint.outputs.pylint_score }}
           maxColorRange: 10
           minColorRange: 8
