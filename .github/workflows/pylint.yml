@@ -20,7 +20,7 @@ jobs:
         run: |
           pylint --output-format=json ./**/*.py --good-names=x,y > pylint_report.json || true
           pylint_score=$(pylint --score y ./**/*.py --good-names=x,y || true)
-          echo "::set-output name=pylint_score::$pylint_score"
+          echo "SCORE=$pylint_score" >> $GITHUB_ENV
         shell: bash
       - name: Convert Pylint output to HTML
         run: |
@@ -38,7 +38,7 @@ jobs:
           gistID: f75ffb077874ae17accb0f18037eef5d
           filename: badge.json
           label: Pylint
-          message: is ${{ steps.pylint.outputs.pylint_score }}
-          valColorRange: ${{ steps.pylint.outputs.pylint_score }}
+          message: ${{ env.SCORE }}
+          valColorRange: ${{ env.SCORE }}
           maxColorRange: 10
           minColorRange: 8
