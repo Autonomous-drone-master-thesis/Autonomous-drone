@@ -1,7 +1,7 @@
 import cv2
 
 from detectors import FaceDetector
-from hanlders import TelloHandler
+from handlers import TelloHandler
 from trackers import FaceTracker
 
 
