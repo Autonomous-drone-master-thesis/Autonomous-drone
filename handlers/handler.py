@@ -2,7 +2,7 @@
 try:
     from djitellopy import Tello
 except ImportError:
-    tello = None
+    Tello = None
 
 
 class TelloHandler(Tello):

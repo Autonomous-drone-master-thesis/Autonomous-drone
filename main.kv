@@ -1,0 +1,40 @@
+#:kivy 2.1.0
+<MyUI>:
+    videp: video
+    batery: batery
+    flight_time: flight_time
+    start_button: start_button
+    stop_button: stop_button
+    BoxLayout:
+        orientation: 'vertical'
+        Image:
+            id: video
+            size_hint: 1, 1
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, 1
+            Label:
+                id: batery
+                text: "-"
+                size_hint: 0.5, 1
+                font_size: 20
+            Label:
+                id: flight_time
+                text: "-"
+                size_hint: 0.5, 1
+                font_size: 20
+            Button:
+                id: start_button
+                text: "Start"
+                size_hint: 0.5, 1
+                font_size: 20
+                size: 50, 25
+                on_press: root.start()
+            Button:
+                id: stop_button
+                text: "Stop"
+                size_hint: 0.5, 1
+                font_size: 20
+                size: 50, 25
+                on_press: root.stop()
+                disabled: True
