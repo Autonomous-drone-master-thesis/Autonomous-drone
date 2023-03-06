@@ -17,4 +17,5 @@ class TelloHandler(Tello):
 
     def disconnect(self) -> None:
         """Disconnects from the drone and lands it."""
+        self.streamoff()
         self.land()
