@@ -13,7 +13,6 @@ class TelloHandler(Tello):
         self.connect()
         self.streamon()
         self.takeoff()
-        self.send_rc_control(0, 0, 25, 0)
 
     def disconnect(self) -> None:
         """Disconnects from the drone and lands it."""

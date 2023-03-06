@@ -2,39 +2,42 @@
 <MyUI>:
     video: video
     battery: battery
+    wifi: wifi
     flight_time: flight_time
+    video_trigger: video_trigger
     start_button: start_button
-    stop_button: stop_button
-    BoxLayout:
+    RelativeLayout:
         orientation: 'vertical'
         Image:
             id: video
-            size_hint: 1, 1
-        BoxLayout:
-            orientation: 'horizontal'
-            size_hint: 1, 1
-            Label:
-                id: battery
-                text: "-"
-                size_hint: 0.5, 1
-                font_size: 20
-            Label:
-                id: flight_time
-                text: "-"
-                size_hint: 0.5, 1
-                font_size: 20
-            Button:
-                id: start_button
-                text: "Start"
-                size_hint: 0.5, 1
-                font_size: 20
-                size: 50, 25
-                on_press: root.start()
-            Button:
-                id: stop_button
-                text: "Stop"
-                size_hint: 0.5, 1
-                font_size: 20
-                size: 50, 25
-                on_press: root.stop()
-                disabled: True
+        Image:
+            id: battery
+            source: "icons/Battery-high.png"
+            font_size: 20
+            size_hint: 0.1, 0.1
+            pos_hint: {'x': 0, 'top': 1}
+        Button:
+            id: wifi
+            text: "wifi"
+            font_size: 20
+            size_hint: 0.1, 0.1
+            pos_hint: {'x': 0.1, 'top': 1}
+        Button:
+            id: flight_time
+            text: "flight_time"
+            font_size: 20
+            size_hint: 0.1, 0.1
+            pos_hint: {'center_x': 0.5, 'top': 1}
+        Button:
+            id: video_trigger
+            text: "video_trigger"
+            font_size: 20
+            size_hint: 0.1, 0.1
+            pos_hint: {'right':1, 'top':1}
+        Button:
+            id: start_button
+            text: "Start"
+            font_size: 20
+            size_hint: 0.1, 0.1
+            pos_hint: {'center_x': 0.5, 'bottom': 0}
+            on_press: root.start()

@@ -1,4 +1,3 @@
-import kivy
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics.texture import Texture
@@ -9,8 +8,6 @@ import cv2
 from handlers import TelloHandler
 from detectors import FaceDetector
 from trackers import FaceTracker
-
-kivy.require("2.1.0")
 
 class MyUI(BoxLayout):
     def __init__(self, **kwargs):
@@ -25,6 +22,7 @@ class MyUI(BoxLayout):
     def start(self):
         self.drone = TelloHandler()
         self.drone.connect_and_initiate()
+        self.drone.send_rc_control(0, 0, 25, 0)
         self._update_buttons()
         self.detector = FaceDetector()
         self.tracker = FaceTracker(self.drone)
@@ -51,7 +49,11 @@ class MyUI(BoxLayout):
         self.video.texture = texture
         
     def update_battery(self, dt):
-        self.battery.text = f"Battery: {self.drone.get_battery()}"
+        batery = self.drone.get_battery()
+        if batery > 50:
+            self.battery.source = "icons/Battery-high.png"
+        else:
+            self.battery.source = "icons/Battery-low.png"
         
     def _update_buttons(self):
         self.start_button.disabled = not self.start_button.disabled
