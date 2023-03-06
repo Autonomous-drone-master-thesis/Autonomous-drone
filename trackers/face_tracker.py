@@ -22,8 +22,8 @@ class FaceTracker:
         self.drone = drone
         self.area_range = [0.03, 0.05]
         self.pid = [0.3, 0.3, 0]
-        self.width = 360
-        self.height = 240
+        self.width = 1280
+        self.height = 720
 
     def track(self, area: float, center: Tuple[int, int], previous_error: int) -> int:
         """Track the face.

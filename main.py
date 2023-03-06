@@ -22,7 +22,7 @@ class MyUI(BoxLayout):
     def start(self):
         self.drone = TelloHandler()
         self.drone.connect_and_initiate()
-        self.drone.send_rc_control(0, 0, 25, 0)
+        # self.drone.send_rc_control(0, 0, 25, 0)
         self._update_buttons()
         self.detector = FaceDetector()
         self.tracker = FaceTracker(self.drone)
@@ -36,10 +36,9 @@ class MyUI(BoxLayout):
         self.drone.disconnect()
 
     def update_video_feed(self, dt):
-        frame = self.drone.get_frame_read().frame
-        img = cv2.resize(frame, (360, 240))
+        img = self.drone.get_frame_read().frame
 
-        img, middle, area = self.detector._predict(img)
+        img, middle, area = self.detector.predict(img)
         self.previous_error = self.tracker.track(area, middle, self.previous_error)
 
         buf1 = cv2.flip(img, 0)
@@ -56,8 +55,12 @@ class MyUI(BoxLayout):
             self.battery.source = "icons/Battery-low.png"
         
     def _update_buttons(self):
-        self.start_button.disabled = not self.start_button.disabled
-        self.stop_button.disabled = not self.stop_button.disabled
+        if self.start_button.size_hint == (0, 0):
+            self.start_button.size_hint = (0.1, 0.1) 
+            self.stop_button.size_hint = (0, 0)
+        else:
+            self.start_button.size_hint = (0, 0)
+            self.stop_button.size_hint = (0.1, 0.1)
 
 
 class MainApp(App):

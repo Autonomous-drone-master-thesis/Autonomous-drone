@@ -106,7 +106,7 @@ class BaseDetector(abc.ABC):
 
         return cap
 
-    def _predict(self, img: np.ndarray) -> Tuple[np.ndarray, Tuple[int, int], float]:
+    def predict(self, img: np.ndarray) -> Tuple[np.ndarray, Tuple[int, int], float]:
         """
         Perform object detection on the input image and return the resulting
         :param img: the input image to perform object detection on
