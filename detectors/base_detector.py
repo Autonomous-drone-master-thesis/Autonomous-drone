@@ -25,7 +25,7 @@ class BaseDetector(abc.ABC):
         self.logger = logging.getLogger(__name__)
 
     @abc.abstractmethod
-    def load_model(self) -> None:
+    def _load_model(self) -> None:
         """
         Abstract method for loading the object detection model.
         """
