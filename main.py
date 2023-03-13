@@ -4,6 +4,9 @@ from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 
 import cv2
+import datetime
+
+import random
 
 from handlers import TelloHandler
 from detectors import FaceDetector
@@ -13,29 +16,43 @@ class MyUI(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.drone = None
+        self.drone = TelloHandler()
+        self.drone.connect_and_initiate()
         self.detector = None
         self.tracker = None
         self.previous_error = 0
         self.flight_start = 0
+    
+    def button_handler(self):
+        if self.button.text == "Start":
+            self._start()
+        elif self.button.text == "Stop":
+            self._stop()
+        else:
+            print("Unknown button pressed")
 
-    def start(self):
-        self.drone = TelloHandler()
-        self.drone.connect_and_initiate()
-        # self.drone.send_rc_control(0, 0, 25, 0)
+    def _start(self):
+        print("Start button pressed")
+        self.drone.takeoff()
+        self.drone.send_rc_control(0, 0, 25, 0)
         self._update_buttons()
         self.detector = FaceDetector()
         self.tracker = FaceTracker(self.drone)
 
-        Clock.schedule_interval(self.update_video_feed, 1 / 60)
-        Clock.schedule_interval(self.update_battery, 1)
-        # Clock.schedule_interval(self.update_flight_time, 1)
+        self.flight_start = datetime.datetime.now()
+        Clock.schedule_interval(self._update_video_feed, 1 / 60)
+        Clock.schedule_interval(self._update_battery, 1)
+        Clock.schedule_interval(self._update_flight_time, 1 / 100)
+        Clock.schedule_interval(self._update_current_speed, 1 / 2)
 
-    def stop(self):
+    def _stop(self):
         self._update_buttons()
+        print("Stop button pressed")
+        Clock.unschedule(self._update_battery)
+        Clock.unschedule(self._update_flight_time)
         self.drone.disconnect()
 
-    def update_video_feed(self, dt):
+    def _update_video_feed(self, dt):
         img = self.drone.get_frame_read().frame
 
         img, middle, area = self.detector.predict(img)
@@ -47,20 +64,25 @@ class MyUI(BoxLayout):
         texture.blit_buffer(buf, colorfmt="bgr", bufferfmt="ubyte")
         self.video.texture = texture
         
-    def update_battery(self, dt):
+    def _update_battery(self, dt):
         batery = self.drone.get_battery()
-        if batery > 50:
-            self.battery.source = "icons/Battery-high.png"
-        else:
-            self.battery.source = "icons/Battery-low.png"
+        self.battery.text = f"Battery: {random.randint(0, 100)}%"
+        
+    def _update_flight_time(self, dt):
+        flight_time = datetime.datetime.now() - self.flight_start
+        self.flight_time.text = f"Flight time: {flight_time}"
+    
+    def _modify_status(self, new_status):
+        self.status.text = new_status
         
     def _update_buttons(self):
-        if self.start_button.size_hint == (0, 0):
-            self.start_button.size_hint = (0.1, 0.1) 
-            self.stop_button.size_hint = (0, 0)
+        if self.button.text == "Start":
+            self.button.text = "Stop"
         else:
-            self.start_button.size_hint = (0, 0)
-            self.stop_button.size_hint = (0.1, 0.1)
+            self.button.text = "Start"
+    
+    def _update_current_speed(self):
+        self.current_speed.text = f"Current speed: {self.drone.get_current_speed()}"
 
 
 class MainApp(App):

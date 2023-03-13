@@ -2,33 +2,43 @@
 <MyUI>:
     video: video
     battery: battery
-    wifi: wifi
+    status: status
     flight_time: flight_time
+    current_speed: current_speed
     video_trigger: video_trigger
-    start_button: start_button
-    stop_button: stop_button
+    button: button
     RelativeLayout:
         orientation: 'vertical'
         Image:
             id: video
-        Image:
+        Label:
             id: battery
-            source: "icons/Battery-high.png"
-            font_size: 20
+            text: "Battery: N/A"
+            color: 0, 0, 0, 1
+            font_size: 10
             size_hint: 0.1, 0.1
             pos_hint: {'x': 0, 'top': 1}
-        Button:
-            id: wifi
-            text: "wifi"
-            font_size: 20
+        Label:
+            id: status
+            text: "Status: Not connected"
+            color: 0, 0, 0, 1
+            font_size: 10
             size_hint: 0.1, 0.1
             pos_hint: {'x': 0.1, 'top': 1}
-        Button:
+        Label:
             id: flight_time
-            text: "flight_time"
-            font_size: 20
+            text: "Flight time: 0:00:00.00"
+            color: 0, 0, 0, 1
+            font_size: 10
             size_hint: 0.1, 0.1
-            pos_hint: {'center_x': 0.5, 'top': 1}
+            pos_hint: {'center_x': 0.4, 'top': 1}
+        Label:
+            id: current_speed
+            text: "Speed: 0 m/s"
+            color: 0, 0, 0, 1
+            font_size: 10
+            size_hint: 0.1, 0.1
+            pos_hint: {'center_x': 0.6, 'top': 1}
         Button:
             id: video_trigger
             text: "video_trigger"
@@ -36,16 +46,10 @@
             size_hint: 0.1, 0.1
             pos_hint: {'right':1, 'top':1}
         Button:
-            id: start_button
+            id: button
             text: "Start"
             font_size: 20
             size_hint: 0.1, 0.1
+            opacity: 1
             pos_hint: {'center_x': 0.5, 'bottom': 0}
-            on_press: root.start()
-        Button:
-            id: stop_button
-            text: "stop"
-            font_size: 20
-            size_hint: 0, 0
-            pos_hint: {'center_x': 0.5, 'bottom': 0}
-            on_press: root.start()
+            on_press: root.button_handler()
