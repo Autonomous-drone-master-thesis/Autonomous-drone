@@ -5,6 +5,7 @@
     status: status
     flight_time: flight_time
     current_speed: current_speed
+    temperature: temperature
     video_trigger: video_trigger
     button: button
     RelativeLayout:
@@ -14,31 +15,38 @@
         Label:
             id: battery
             text: "Battery: N/A"
-            color: 0, 0, 0, 1
+            color: 1, 1, 1, 1
             font_size: 10
             size_hint: 0.1, 0.1
             pos_hint: {'x': 0, 'top': 1}
         Label:
             id: status
             text: "Status: Not connected"
-            color: 0, 0, 0, 1
+            color: 1, 1, 1, 1
             font_size: 10
             size_hint: 0.1, 0.1
             pos_hint: {'x': 0.1, 'top': 1}
         Label:
             id: flight_time
             text: "Flight time: 0:00:00.00"
-            color: 0, 0, 0, 1
+            color: 1, 1, 1, 1
             font_size: 10
             size_hint: 0.1, 0.1
             pos_hint: {'center_x': 0.4, 'top': 1}
         Label:
             id: current_speed
             text: "Speed: 0 m/s"
-            color: 0, 0, 0, 1
+            color: 1, 1, 1, 1
             font_size: 10
             size_hint: 0.1, 0.1
             pos_hint: {'center_x': 0.6, 'top': 1}
+        Label:
+            id: temperature
+            text: "Temperature: 0"
+            color: 1, 1, 1, 1
+            font_size: 10
+            size_hint: 0.1, 0.1
+            pos_hint: {'center_x': 0.8, 'top': 1}
         Button:
             id: video_trigger
             text: "video_trigger"

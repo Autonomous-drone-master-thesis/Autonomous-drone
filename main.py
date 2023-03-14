@@ -4,9 +4,7 @@ from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 
 import cv2
-import datetime
-
-import random
+import math
 
 from handlers import TelloHandler
 from detectors import FaceDetector
@@ -18,10 +16,14 @@ class MyUI(BoxLayout):
 
         self.drone = TelloHandler()
         self.drone.connect_and_initiate()
-        self.detector = None
-        self.tracker = None
+        self.detector = FaceDetector()
+        self.tracker = FaceTracker(self.drone)
         self.previous_error = 0
-        self.flight_start = 0
+
+        Clock.schedule_interval(self._update_battery, 1)
+        Clock.schedule_interval(self._update_current_speed, 1 / 2)
+        Clock.schedule_interval(self._update_temperature, 1 / 2)
+
     
     def button_handler(self):
         if self.button.text == "Start":
@@ -33,22 +35,16 @@ class MyUI(BoxLayout):
 
     def _start(self):
         print("Start button pressed")
-        self.drone.takeoff()
-        self.drone.send_rc_control(0, 0, 25, 0)
+        self.drone.takeoff_and_hover()
         self._update_buttons()
-        self.detector = FaceDetector()
-        self.tracker = FaceTracker(self.drone)
 
-        self.flight_start = datetime.datetime.now()
         Clock.schedule_interval(self._update_video_feed, 1 / 60)
-        Clock.schedule_interval(self._update_battery, 1)
         Clock.schedule_interval(self._update_flight_time, 1 / 100)
-        Clock.schedule_interval(self._update_current_speed, 1 / 2)
 
     def _stop(self):
         self._update_buttons()
         print("Stop button pressed")
-        Clock.unschedule(self._update_battery)
+        Clock.unschedule(self._update_video_feed)
         Clock.unschedule(self._update_flight_time)
         self.drone.disconnect()
 
@@ -66,11 +62,20 @@ class MyUI(BoxLayout):
         
     def _update_battery(self, dt):
         batery = self.drone.get_battery()
-        self.battery.text = f"Battery: {random.randint(0, 100)}%"
+        self.battery.text = f"Battery: {batery}%"
         
     def _update_flight_time(self, dt):
-        flight_time = datetime.datetime.now() - self.flight_start
-        self.flight_time.text = f"Flight time: {flight_time}"
+        self.flight_time.text = f"Flight time: {self.drone.get_flight_time()}"
+
+    def _update_current_speed(self, dt):
+        speed_x = self.drone.get_speed_x()
+        speed_y = self.drone.get_speed_y()
+        speed_z = self.drone.get_speed_z()
+        total_speed = math.sqrt(speed_x**2 + speed_y**2 + speed_z**2)
+        self.current_speed.text = f"Current speed: {total_speed}"
+    
+    def _update_temperature(self, dt):
+        self.temperature.text = f"Temperature: {self.drone.get_temperature()}"
     
     def _modify_status(self, new_status):
         self.status.text = new_status
@@ -80,9 +85,6 @@ class MyUI(BoxLayout):
             self.button.text = "Stop"
         else:
             self.button.text = "Start"
-    
-    def _update_current_speed(self):
-        self.current_speed.text = f"Current speed: {self.drone.get_current_speed()}"
 
 
 class MainApp(App):

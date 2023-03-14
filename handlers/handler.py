@@ -12,8 +12,14 @@ class TelloHandler(Tello):
         """Connects to the drone and initiates the drone to takeoff and hover at 25cm."""
         self.connect()
         self.streamon()
+    
+    def takeoff_and_hover(self) -> None:
+        """Takes off and hovers at 35cm."""
+        self.takeoff()
+        self.send_rc_control(0, 0, 25, 0)
 
     def disconnect(self) -> None:
         """Disconnects from the drone and lands it."""
-        self.streamoff()
+        self.send_rc_control(0, 0, 0, 0)
+        # self.streamoff()
         self.land()

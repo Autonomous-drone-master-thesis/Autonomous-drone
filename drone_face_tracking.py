@@ -15,11 +15,12 @@ def main():
 
     previous_error = 0
 
+    drone.takeoff_and_hover()
+
     while True:
         frame = drone.get_frame_read().frame
-        img = cv2.resize(frame, (360, 240))
 
-        img, middle, area = detector._predict(img)
+        img, middle, area = detector.predict(frame)
         previous_error = tracker.track(area, middle, previous_error)
 
         cv2.imshow("Image", img)
@@ -27,3 +28,5 @@ def main():
             break
 
     drone.disconnect()
+
+main()
