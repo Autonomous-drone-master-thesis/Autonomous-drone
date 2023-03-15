@@ -73,8 +73,7 @@ class BaseDetector(abc.ABC):
             fps = 1 / (current_time - start_time)
             start_time = current_time
 
-            img, middle, area = self._predict(img)
-            print(middle, area)
+            img, middle, area = self.predict(img)
 
             # Add the FPS to the image and display it
             cv2.putText(
@@ -106,7 +105,7 @@ class BaseDetector(abc.ABC):
 
         return cap
 
-    def _predict(self, img: np.ndarray) -> Tuple[np.ndarray, Tuple[int, int], float]:
+    def predict(self, img: np.ndarray) -> Tuple[np.ndarray, Tuple[int, int], float]:
         """
         Perform object detection on the input image and return the resulting
         :param img: the input image to perform object detection on
