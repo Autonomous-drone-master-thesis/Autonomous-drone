@@ -9,7 +9,6 @@ video_path = 0
 threshold = 0.5
 
 detector = FaceDetector(threshold)
-detector.load_model()
 
 # Video prediction
 detector.predict_video(video_path)

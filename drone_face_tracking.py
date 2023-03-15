@@ -13,7 +13,8 @@ def main():
 
     tracker = FaceTracker(drone)
 
-    previous_error = 0
+    previous_error_x = 0
+    previous_error_y = 0
 
     drone.takeoff_and_hover()
 
@@ -21,12 +22,13 @@ def main():
         frame = drone.get_frame_read().frame
 
         img, middle, area = detector.predict(frame)
-        previous_error = tracker.track(area, middle, previous_error)
+        previous_error_x, previous_error_y = tracker.track(area, middle, (previous_error_x, previous_error_y))
 
         cv2.imshow("Image", img)
         if cv2.waitKey(1) and 0xFF == ord("q"):
             break
 
     drone.disconnect()
+
 
 main()

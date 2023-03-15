@@ -25,34 +25,37 @@ class FaceTracker:
         self.width = 1280
         self.height = 720
 
-    def track(self, area: float, center: Tuple[int, int], previous_error: int) -> int:
+    def track(self, area: float, center: Tuple[int, int], previous_error: Tuple[int, int]) -> Tuple[int, int]:
         """Track the face.
 
         Args:
             area (float): Area of the face
             center (Tuple[int, int]): Center of the face
-            previous_error (int): Previous error
+            previous_error (Tuple[int, int]): Previous error (x and y)
 
         Returns:
-            int: Current error
+            Tuple[int, int]: Current error (x and y)
         """
         x, y = center
-        print(x,y)
-        forward_backward = 0
-        up_down = 0
-        current_error = x - self.width // 2
-        speed = self.pid[0] * current_error + self.pid[1] * (current_error - previous_error)
-        speed = int(np.clip(speed, -75, 75))
+
+        left_right_velocity = 0
+        forward_backward_velocity = 0
+        up_down_velocity = 0
+        yaw_velocity = 0
+
+        current_error_x = x - self.width // 2
+        left_right_velocity = self.pid[0] * current_error_x + self.pid[1] * (current_error_x - previous_error[0])
+        left_right_velocity = int(np.clip(left_right_velocity, -100, 100))
+
+        current_error_y = y - self.height // 2
+        up_down_velocity = self.pid[0] * current_error_y + self.pid[1] * (current_error_y - previous_error[1])
+        up_down_velocity = int(np.clip(up_down_velocity, -100, 100))
+
         if area > self.area_range[1]:
-            forward_backward = -10
+            forward_backward_velocity = -10
         elif area < self.area_range[0] and area != 0:
-            forward_backward = 10
-        if y != 0:
-            if y > self.height // 2:
-                up_down = 10
-            elif y < self.height // 2:
-                up_down = -10
+            forward_backward_velocity = 10
 
-        self.drone.send_rc_control(0, forward_backward, up_down, speed)
+        self.drone.send_rc_control(left_right_velocity, forward_backward_velocity, up_down_velocity, yaw_velocity)
 
-        return current_error
+        return current_error_x, current_error_y

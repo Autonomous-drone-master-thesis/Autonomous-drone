@@ -73,8 +73,7 @@ class BaseDetector(abc.ABC):
             fps = 1 / (current_time - start_time)
             start_time = current_time
 
-            img, middle, area = self._predict(img)
-            print(middle, area)
+            img, middle, area = self.predict(img)
 
             # Add the FPS to the image and display it
             cv2.putText(
