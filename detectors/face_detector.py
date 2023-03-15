@@ -31,7 +31,7 @@ class FaceDetector(BaseDetector):
         """
         self.logger.info("Loading face detection model")
         self.model = mp.solutions.face_detection.FaceDetection(
-            model_selection=0, min_detection_confidence=self.threshold
+            model_selection=1, min_detection_confidence=self.threshold
         )
         self.mp_drawing = mp.solutions.drawing_utils
         self.logger.info("Face detection model loaded")

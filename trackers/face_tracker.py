@@ -20,8 +20,8 @@ class FaceTracker:
             drone (TelloHandler): the drone to control
         """
         self.drone = drone
-        self.area_range = [0.03, 0.05]
-        self.pid = [0.25, 0.25, 0]
+        self.area_range = [0.01, 0.02]
+        self.pid = [0.15, 0.15, 0]
         self.width = 1280
         self.height = 720
 
@@ -37,25 +37,27 @@ class FaceTracker:
             Tuple[int, int]: Current error (x and y)
         """
         x, y = center
+        previous_error_x, previous_error_y = previous_error
 
-        left_right_velocity = 0
+        current_error_y = 0
         forward_backward_velocity = 0
         up_down_velocity = 0
         yaw_velocity = 0
 
         current_error_x = x - self.width // 2
-        left_right_velocity = self.pid[0] * current_error_x + self.pid[1] * (current_error_x - previous_error[0])
-        left_right_velocity = int(np.clip(left_right_velocity, -100, 100))
+        yaw_velocity = self.pid[0] * current_error_x + self.pid[1] * (current_error_x - previous_error_x)
+        yaw_velocity = int(np.clip(yaw_velocity, -50, 50))
 
-        current_error_y = y - self.height // 2
-        up_down_velocity = self.pid[0] * current_error_y + self.pid[1] * (current_error_y - previous_error[1])
-        up_down_velocity = int(np.clip(up_down_velocity, -100, 100))
+        if x != 0 and y != 0:
+            current_error_y = y - self.height // 2
+            up_down_velocity = -(self.pid[0] * current_error_y + self.pid[1] * (current_error_y - previous_error_y))
+            up_down_velocity = int(np.clip(up_down_velocity, -25, 25))
 
-        if area > self.area_range[1]:
-            forward_backward_velocity = -10
-        elif area < self.area_range[0] and area != 0:
-            forward_backward_velocity = 10
+            if area > self.area_range[1]:
+                forward_backward_velocity = -10
+            elif area < self.area_range[0] and area != 0:
+                forward_backward_velocity = 10
 
-        self.drone.send_rc_control(left_right_velocity, forward_backward_velocity, up_down_velocity, yaw_velocity)
+        self.drone.send_rc_control(0, forward_backward_velocity, up_down_velocity, yaw_velocity)
 
         return current_error_x, current_error_y
