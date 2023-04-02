@@ -20,10 +20,9 @@ class FaceTracker:
             drone (TelloHandler): the drone to control
         """
         self.drone = drone
+        self.width, self.height = 1280, 720
         self.area_range = [0.01, 0.02]
         self.pid = [0.15, 0.15, 0]
-        self.width = 1280
-        self.height = 720
 
     def track(self, area: float, center: Tuple[int, int], previous_error: Tuple[int, int]) -> Tuple[int, int]:
         """Track the face.

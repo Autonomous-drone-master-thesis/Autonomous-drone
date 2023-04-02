@@ -104,20 +104,3 @@ class BaseDetector(abc.ABC):
             raise ValueError("Cannot open camera")
 
         return cap
-
-    def predict(self, img: np.ndarray) -> Tuple[np.ndarray, Tuple[int, int], float]:
-        """
-        Perform object detection on the input image and return the resulting
-        :param img: the input image to perform object detection on
-        :return: the resulting image with the bounding boxes added
-        """
-        # Set the image to read-only mode to improve performance
-        img.flags.writeable = False
-
-        results = self._model_process(self._preprocess_image(img))
-
-        # Set the image back to writeable mode
-        img.flags.writeable = True
-
-        img, middle, area = self._visualize_bounding_box(img, results)
-        return img, middle, area

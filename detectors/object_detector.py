@@ -31,6 +31,23 @@ class ObjectDetector(BaseDetector):
         self.classes_list, self.color_list = self._read_classes()
         self._download_model(model_url)
         self._load_model()
+    
+    def predict(self, img: np.ndarray) -> Tuple[np.ndarray, Tuple[int, int], float]:
+        """
+        Perform object detection on the input image and return the resulting
+        :param img: the input image to perform object detection on
+        :return: the resulting image with the bounding boxes added
+        """
+        # Set the image to read-only mode to improve performance
+        img.flags.writeable = False
+
+        results = self._model_process(self._preprocess_image(img))
+
+        # Set the image back to writeable mode
+        img.flags.writeable = True
+
+        img, center, bbox_height = self._visualize_bounding_box(img, results)
+        return img, center, bbox_height
 
     def _read_classes(self) -> Tuple[list[str], np.ndarray[Any, np.dtype[np.float64]]]:
         """
@@ -110,11 +127,11 @@ class ObjectDetector(BaseDetector):
 
         height, width, _ = img.shape
 
-        img = self._draw_bounding_boxes(
+        img, center, bbox_height = self._draw_bounding_boxes(
             img, bbox_idx, bboxs, class_indexes, class_scores, height, width
         )
 
-        return img
+        return img, center, bbox_height
 
     def _get_bounding_boxes(
         self, detections: dict
@@ -145,13 +162,13 @@ class ObjectDetector(BaseDetector):
     def _draw_bounding_boxes(
         self,
         img: np.ndarray,
-        bbox_idx: np.ndarray,
+        bbox_idx,
         bboxs: np.ndarray,
         class_indexes: np.ndarray,
         class_scores: np.ndarray,
         height: int,
         width: int,
-    ) -> np.ndarray:
+    ) -> Tuple[np.ndarray, Tuple[int, int], float]:
         """
         Draw the bounding boxes around the detected objects
         and add the class names and confidence scores as text.
@@ -164,7 +181,10 @@ class ObjectDetector(BaseDetector):
         :param width: the width of the input image
         :return: the image with the bounding boxes and class names added
         """
-        if bbox_idx:
+        center = (0, 0)
+        bbox_height = 0
+
+        if tf.size(bbox_idx) > 0:
             for box in bbox_idx:
                 index = class_indexes[box]
                 class_name = self.classes_list[index]
@@ -189,4 +209,7 @@ class ObjectDetector(BaseDetector):
                         img, label, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
                     )
 
-        return img
+                    center = (int((xmin + xmax) / 2), int((ymin + ymax) / 2))
+                    bbox_height = ymax - ymin
+
+        return img, center, bbox_height
