@@ -1,7 +1,11 @@
-from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
+from kivy.lang import Builder
+
+from kivymd.app import MDApp
+
 
 import cv2
 import math
@@ -10,43 +14,45 @@ from handlers import TelloHandler
 from detectors import FaceDetector
 from trackers import FaceTracker
 
-class MyUI(BoxLayout):
+
+class LandingUI(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.drone = TelloHandler()
-        self.drone.connect_and_initiate()
-        self.detector = FaceDetector()
-        self.tracker = FaceTracker(self.drone)
-        self.previous_error = 0
 
-        Clock.schedule_interval(self._update_battery, 1)
-        Clock.schedule_interval(self._update_current_speed, 1 / 2)
-        Clock.schedule_interval(self._update_temperature, 1 / 2)
+class MainUI(FloatLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.running = False
+        # self.drone = TelloHandler()
+        # self.drone.connect_and_initiate()
+        # self.detector = FaceDetector()
+        # self.tracker = FaceTracker(self.drone)
+        # self.previous_error = 0
+
+        # Clock.schedule_interval(self._update_battery, 1)
+        # Clock.schedule_interval(self._update_current_speed, 1 / 2)
+        # Clock.schedule_interval(self._update_temperature, 1 / 2)
 
     
     def button_handler(self):
-        if self.button.text == "Start":
-            self._start()
-        elif self.button.text == "Stop":
+        if self.running:
             self._stop()
         else:
-            print("Unknown button pressed")
+            self._start()
 
     def _start(self):
-        print("Start button pressed")
-        self.drone.takeoff_and_hover()
-        self._update_buttons()
-
-        Clock.schedule_interval(self._update_video_feed, 1 / 60)
-        Clock.schedule_interval(self._update_flight_time, 1 / 100)
+        #self.drone.takeoff_and_hover()
+        self._update_running_status()
+        # Clock.schedule_interval(self._update_video_feed, 1 / 60)
+        # Clock.schedule_interval(self._update_flight_time, 1 / 100)
 
     def _stop(self):
-        self._update_buttons()
-        print("Stop button pressed")
-        Clock.unschedule(self._update_video_feed)
-        Clock.unschedule(self._update_flight_time)
-        self.drone.disconnect()
+        self._update_running_status()
+        #Clock.unschedule(self._update_video_feed)
+        #Clock.unschedule(self._update_flight_time)
+        #self.drone.disconnect()
 
     def _update_video_feed(self, dt):
         img = self.drone.get_frame_read().frame
@@ -78,19 +84,29 @@ class MyUI(BoxLayout):
         self.temperature.text = f"Temperature: {self.drone.get_temperature()}"
     
     def _modify_status(self, new_status):
-        self.status.text = new_status
+        self.status.text = f"Status: {new_status}"
         
-    def _update_buttons(self):
-        if self.button.text == "Start":
-            self.button.text = "Stop"
+    def _update_running_status(self):
+        if self.running:
+            self.running = False
+            self.action_button.icon = "play"
+            self._modify_status("Landing")
         else:
-            self.button.text = "Start"
+            self.running = True
+            self.action_button.icon = "pause"
+            self._modify_status("Flying")
 
 
-class MainApp(App):
+class MainApp(MDApp):
     def build(self):
-        return MyUI()
+        self.current_layout = LandingUI()
+        return self.current_layout
 
+    def switch_layout(self):
+        new_layout = MainUI()
+        self.root.clear_widgets()
+        self.root.add_widget(new_layout)
+        self.current_layout = new_layout
 
 if __name__ == "__main__":
     MainApp().run()

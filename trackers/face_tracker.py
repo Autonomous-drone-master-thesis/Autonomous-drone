@@ -50,12 +50,12 @@ class FaceTracker:
         if x != 0 and y != 0:
             current_error_y = y - self.height // 2
             up_down_velocity = -(self.pid[0] * current_error_y + self.pid[1] * (current_error_y - previous_error_y))
-            up_down_velocity = int(np.clip(up_down_velocity, -25, 25))
+            up_down_velocity = int(np.clip(up_down_velocity, -50, 50))
 
             if area > self.area_range[1]:
-                forward_backward_velocity = -10
+                forward_backward_velocity = -25
             elif area < self.area_range[0] and area != 0:
-                forward_backward_velocity = 10
+                forward_backward_velocity = 25
 
         self.drone.send_rc_control(0, forward_backward_velocity, up_down_velocity, yaw_velocity)
 

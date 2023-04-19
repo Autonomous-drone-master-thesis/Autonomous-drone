@@ -27,18 +27,15 @@ class HumanCircler:
         width = x2 - x1
         height = y2 - y1
 
-        # Calculate the actual distance to the target
         distance_x = self.horizontal_focal_length / width
         distance_y = self.vertical_focal_length / height
 
-        # Adjust PID gains based on the distance to the target
         pid_distance_ratio_x = self.target_distance / distance_x
         pid_distance_ratio_y = self.target_distance / distance_y
 
         adjusted_pid_x = [pid_gain * pid_distance_ratio_x for pid_gain in self.pid]
         adjusted_pid_y = [pid_gain * pid_distance_ratio_y for pid_gain in self.pid]
 
-        # Calculate the error and the velocity commands
         center_x, center_y = (x1 + x2) // 2, (y1 + y2) // 2
         error_x = center_x - self.width // 2
         error_y = center_y - self.height // 2
@@ -50,10 +47,8 @@ class HumanCircler:
             adjusted_pid_y[0] * error_y + adjusted_pid_y[1] * (error_y - previous_error_y)
         )
 
-        # Calculate the velocity needed to circle the target
         circle_velocity = 15
 
-        # Send the velocity commands to the drone
         self.drone.send_rc_control(-circle_velocity, 0, up_down_velocity, yaw_velocity)
 
         return error_x, error_y

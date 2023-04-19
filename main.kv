@@ -1,63 +1,82 @@
+#:import MDLabel kivymd.uix.label.MDLabel
+#:import MDIconButton kivymd.uix.button.MDIconButton
+#:import MDFloatingActionButton kivymd.uix.button.MDFloatingActionButton
+
 #:kivy 2.1.0
-<MyUI>:
+<LandingUI>:
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(20)
+        padding: dp(20)
+        size_hint: (1, 1)
+        MDLabel:
+            text: "Welcome to the Landing Page"
+            halign: 'center'
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            font_style: 'H4'
+        MDFloatingActionButton:
+            icon: 'play'
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            on_release: app.switch_layout()
+
+<MainUI>:
     video: video
     battery: battery
     status: status
     flight_time: flight_time
     current_speed: current_speed
     temperature: temperature
+    download: download
     video_trigger: video_trigger
-    button: button
-    RelativeLayout:
-        orientation: 'vertical'
+    action_button: action_button
+    FloatLayout:
         Image:
             id: video
-        Label:
-            id: battery
-            text: "Battery: N/A"
-            color: 1, 1, 1, 1
-            font_size: 10
-            size_hint: 0.1, 0.1
-            pos_hint: {'x': 0, 'top': 1}
-        Label:
-            id: status
-            text: "Status: Not connected"
-            color: 1, 1, 1, 1
-            font_size: 10
-            size_hint: 0.1, 0.1
-            pos_hint: {'x': 0.1, 'top': 1}
-        Label:
-            id: flight_time
-            text: "Flight time: 0:00:00.00"
-            color: 1, 1, 1, 1
-            font_size: 10
-            size_hint: 0.1, 0.1
-            pos_hint: {'center_x': 0.4, 'top': 1}
-        Label:
-            id: current_speed
-            text: "Speed: 0 m/s"
-            color: 1, 1, 1, 1
-            font_size: 10
-            size_hint: 0.1, 0.1
-            pos_hint: {'center_x': 0.6, 'top': 1}
-        Label:
-            id: temperature
-            text: "Temperature: 0"
-            color: 1, 1, 1, 1
-            font_size: 10
-            size_hint: 0.1, 0.1
-            pos_hint: {'center_x': 0.8, 'top': 1}
-        Button:
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: dp(20)
+            size_hint: (1, 1)
+            pos_hint: {'center_y': 0.95}
+            MDLabel:
+                id: battery
+                text: "Battery: N/A"
+                halign: 'center'
+                theme_text_color: 'Secondary'
+                font_style: 'Caption'
+            MDLabel:
+                id: status
+                text: "Status: Not connected"
+                halign: 'center'
+                theme_text_color: 'Secondary'
+                font_style: 'Caption'
+            MDLabel:
+                id: flight_time
+                text: "Flight time: 0:00:00.00"
+                halign: 'center'
+                theme_text_color: 'Secondary'
+                font_style: 'Caption'
+            MDLabel:
+                id: current_speed
+                text: "Speed: 0 m/s"
+                halign: 'center'
+                theme_text_color: 'Secondary'
+                font_style: 'Caption'
+            MDLabel:
+                id: temperature
+                text: "Temperature: 0"
+                halign: 'center'
+                theme_text_color: 'Secondary'
+                font_style: 'Caption'
+        MDFloatingActionButton:
+            id: download
+            icon: 'camera'
+            pos_hint: {'center_x': 0.05, 'center_y': 0.075}
+        MDFloatingActionButton:
             id: video_trigger
-            text: "video_trigger"
-            font_size: 20
-            size_hint: 0.1, 0.1
-            pos_hint: {'right':1, 'top':1}
-        Button:
-            id: button
-            text: "Start"
-            font_size: 20
-            size_hint: 0.1, 0.1
-            opacity: 1
-            pos_hint: {'center_x': 0.5, 'bottom': 0}
+            icon: 'camera'
+            pos_hint: {'center_x': 0.95, 'center_y': 0.075}
+        MDFloatingActionButton:
+            id: action_button
+            icon: 'play'
+            pos_hint: {'center_x': 0.5, 'center_y': 0.075}
             on_press: root.button_handler()

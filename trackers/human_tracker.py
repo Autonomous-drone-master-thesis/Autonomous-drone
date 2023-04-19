@@ -12,8 +12,10 @@ class HumanTracker:
         drone: TelloHandler,
         horizontal_focal_length: float = 443.61,
         vertical_focal_length: float = 591.48,
-        target_distance: float = 1.5,
-        target_height: float = 1.8
+        target_distance: float = 4.5,
+        target_height: float = 2,
+        real_height: float = 180
+
     ) -> None:
         """Initialize the HumanTracker object with the given drone.
 
@@ -23,10 +25,11 @@ class HumanTracker:
         self.drone = drone
         self.width, self.height = 1280, 720
         self.pid = [0.15, 0.15, 0.1]
-        self.target_distance = 1.5  # Target distance from the person in meters
+        self.target_distance = target_distance
         self.horizontal_focal_length = horizontal_focal_length
         self.vertical_focal_length = vertical_focal_length
-        self.real_height = target_height  # Approximate height of a person in meters
+        self.target_height = target_height
+        self.real_height = real_height
 
     def track(
         self,
@@ -55,6 +58,20 @@ class HumanTracker:
             distance_error = self.target_distance - distance
             forward_backward_velocity = int(np.clip(distance_error * self.pid[2], -20, 20))
 
+            # Calculate angle between the drone and the person
+            height_difference = self.target_height - (bbox_height * distance / self.vertical_focal_length)
+            angle = self._calculate_angle(distance, height_difference)
+
+            # Adjust up_down_velocity based on the angle
+            if angle > 0:
+                up_down_velocity = int(np.clip(angle * self.pid[0], -25, 25))
+            else:
+                up_down_velocity = -int(np.clip(abs(angle) * self.pid[0], -25, 25))
+
         self.drone.send_rc_control(0, forward_backward_velocity, up_down_velocity, yaw_velocity)
 
         return current_error_x, current_error_y
+
+    def _calculate_angle(self, distance, height_difference):
+        angle = np.arctan(height_difference / distance)
+        return angle

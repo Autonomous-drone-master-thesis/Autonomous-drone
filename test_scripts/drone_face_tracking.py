@@ -1,17 +1,18 @@
 import cv2
 
-from detectors import ObjectDetector
+from detectors import FaceDetector
 from handlers import TelloHandler
-from trackers import HumanTracker
+from trackers import FaceTracker
 
 
 def main():
+
     drone = TelloHandler()
     drone.connect_and_initiate()
 
-    detector = ObjectDetector(model_url="https://path/to/your/model", human=True)
+    detector = FaceDetector()
 
-    tracker = HumanTracker(drone)
+    tracker = FaceTracker(drone)
 
     previous_error_x = 0
     previous_error_y = 0
@@ -21,9 +22,8 @@ def main():
         while True:
             frame = drone.get_frame_read().frame
 
-            img, center, bbox_height = detector.predict(frame)
-
-            previous_error_x, previous_error_y = tracker.track(bbox_height, center, (previous_error_x, previous_error_y))
+            img, middle, area = detector.predict(frame)
+            previous_error_x, previous_error_y = tracker.track(area, middle, (previous_error_x, previous_error_y))
 
             cv2.imshow("Image", img)
             if cv2.waitKey(1) and 0xFF == ord("q"):
@@ -34,5 +34,4 @@ def main():
         drone.disconnect()
 
 
-if __name__ == "__main__":
-    main()
+main()
