@@ -8,11 +8,10 @@ from kivymd.app import MDApp
 
 
 import cv2
-import math
 
-from handlers import TelloHandler
-from detectors import FaceDetector
-from trackers import FaceTracker
+# from handlers import TelloHandler
+# from detectors import FaceDetector
+# from trackers import FaceTracker
 
 
 class LandingUI(BoxLayout):
@@ -72,13 +71,6 @@ class MainUI(FloatLayout):
         
     def _update_flight_time(self, dt):
         self.flight_time.text = f"Flight time: {self.drone.get_flight_time()}"
-
-    def _update_current_speed(self, dt):
-        speed_x = self.drone.get_speed_x()
-        speed_y = self.drone.get_speed_y()
-        speed_z = self.drone.get_speed_z()
-        total_speed = math.sqrt(speed_x**2 + speed_y**2 + speed_z**2)
-        self.current_speed.text = f"Current speed: {total_speed}"
     
     def _update_temperature(self, dt):
         self.temperature.text = f"Temperature: {self.drone.get_temperature()}"
