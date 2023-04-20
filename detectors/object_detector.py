@@ -20,14 +20,12 @@ from .base_detector import BaseDetector
 class ObjectDetector(BaseDetector):
     """Class for performing object detection on videos."""
 
-    def __init__(self, model_url: str, threshold: float = 0.5, human: bool = False) -> None:
+    def __init__(self, model_url: str, threshold: float = 0.5) -> None:
         """
         Initialize the ObjectDetector object with the given threshold.
         :param threshold: the minimum confidence score for a detected object to be considered valid
-        :param human: whether to detect only humans or not
         """
         super().__init__(threshold)
-        self.human = human
         self.classes_list, self.color_list = self._read_classes()
         self._download_model(model_url)
         self._load_model()
@@ -183,33 +181,34 @@ class ObjectDetector(BaseDetector):
         """
         center = (0, 0)
         bbox_height = 0
+        person_index = self.classes_list.index("person")
 
         if tf.size(bbox_idx) > 0:
-            for box in bbox_idx:
-                index = class_indexes[box]
-                class_name = self.classes_list[index]
-                if not self.human or class_name == "person":
-                    bbox = tuple(bboxs[box].tolist())
-                    confidence = round(100 * class_scores[box], 2)
+            human_boxes = [(box, class_scores[box]) for box in bbox_idx if class_indexes[box] == person_index]
 
-                    label = f"{class_name} {confidence}%".upper()
-                    color = self.color_list[index]
+            if human_boxes:
+                most_confident_human_box, confidence = max(human_boxes, key=lambda x: x[1])
 
-                    ymin, xmin, ymax, xmax = bbox
+                bbox = tuple(bboxs[most_confident_human_box].tolist())
 
-                    ymin, xmin, ymax, xmax = (
-                        int(ymin * height),
-                        int(xmin * width),
-                        int(ymax * height),
-                        int(xmax * width),
-                    )
+                label = f"person {confidence * 100:.2f}%".upper()
+                color = self.color_list[person_index]
 
-                    cv2.rectangle(img, (xmin, ymin), (xmax, ymax), color, 2)
-                    cv2.putText(
-                        img, label, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
-                    )
+                ymin, xmin, ymax, xmax = bbox
 
-                    center = (int((xmin + xmax) / 2), int((ymin + ymax) / 2))
-                    bbox_height = ymax - ymin
+                ymin, xmin, ymax, xmax = (
+                    int(ymin * height),
+                    int(xmin * width),
+                    int(ymax * height),
+                    int(xmax * width),
+                )
+
+                cv2.rectangle(img, (xmin, ymin), (xmax, ymax), color, 2)
+                cv2.putText(
+                    img, label, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
+                )
+
+                center = (int((xmin + xmax) / 2), int((ymin + ymax) / 2))
+                bbox_height = ymax - ymin
 
         return img, center, bbox_height

@@ -3,7 +3,9 @@
 import abc
 import logging
 import time
-from typing import Union, Any, Tuple
+from typing import Union, Any
+
+from trackers.human_tracker import HumanTracker
 
 try:
     import cv2
@@ -63,6 +65,10 @@ class BaseDetector(abc.ABC):
         cap = self._initiate_video_writer(video)
         self.logger.info("Video initiated.")
 
+        #TODO:REMOVE THIS
+        tracker = HumanTracker("drone_placeholder")
+        previous_error_x, previous_error_y = 0, 0
+
         success, img = cap.read()
         start_time = 0
 
@@ -73,7 +79,10 @@ class BaseDetector(abc.ABC):
             fps = 1 / (current_time - start_time)
             start_time = current_time
 
-            img, middle, area = self.predict(img)
+            img, center, bbox_height = self.predict(img)
+
+            #TODO:REMOVE THIS
+            previous_error_x, previous_error_y = tracker.track(bbox_height, center, (previous_error_x, previous_error_y))
 
             # Add the FPS to the image and display it
             cv2.putText(
