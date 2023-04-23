@@ -38,17 +38,17 @@ class FaceTracker:
         x, y = center
         previous_error_x, previous_error_y = previous_error
 
-        current_error_y = 0
         forward_backward_velocity = 0
         up_down_velocity = 0
         yaw_velocity = 0
 
+        current_error_y = y - self.height // 2
         current_error_x = x - self.width // 2
+
         yaw_velocity = self.pid[0] * current_error_x + self.pid[1] * (current_error_x - previous_error_x)
         yaw_velocity = int(np.clip(yaw_velocity, -50, 50))
 
         if x != 0 and y != 0:
-            current_error_y = y - self.height // 2
             up_down_velocity = -(self.pid[0] * current_error_y + self.pid[1] * (current_error_y - previous_error_y))
             up_down_velocity = int(np.clip(up_down_velocity, -50, 50))
 

@@ -12,12 +12,13 @@ def main():
     drone = TelloHandler()
     drone.connect_and_initiate()
 
-    detector = ObjectDetector(model_url=model_path, human=True)
+    detector = ObjectDetector(model_url=model_path)
 
     tracker = HumanTracker(drone)
 
     previous_error_x = 0
     previous_error_y = 0
+    previous_error_z = 0
 
     drone.takeoff_and_hover()
     while True:
@@ -25,7 +26,7 @@ def main():
 
         img, center, bbox_height = detector.predict(frame)
 
-        previous_error_x, previous_error_y = tracker.track(bbox_height, center, (previous_error_x, previous_error_y))
+        previous_error_x, previous_error_y, previous_error_z = tracker.track(bbox_height, center, (previous_error_x, previous_error_y, previous_error_z))
 
         cv2.imshow("Image", img)
         if cv2.waitKey(1) and 0xFF == ord("q"):

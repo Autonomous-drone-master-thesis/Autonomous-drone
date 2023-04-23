@@ -9,7 +9,7 @@ model_path = (
 )
 
 # video_path = 0
-video_path = "../1681909157180.mp4"
+video_path = "1682006597205.mp4"
 
 threshold = 0.5
 

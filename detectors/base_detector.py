@@ -25,6 +25,7 @@ class BaseDetector(abc.ABC):
         """
         self.threshold: float = threshold
         self.logger = logging.getLogger(__name__)
+        self.model = None
 
     @abc.abstractmethod
     def _load_model(self) -> None:
@@ -65,9 +66,9 @@ class BaseDetector(abc.ABC):
         cap = self._initiate_video_writer(video)
         self.logger.info("Video initiated.")
 
-        #TODO:REMOVE THIS
+        # TODO:REMOVE THIS
         tracker = HumanTracker("drone_placeholder")
-        previous_error_x, previous_error_y = 0, 0
+        previous_error_x, previous_error_y, previous_error_z = 0, 0, 0
 
         success, img = cap.read()
         start_time = 0
@@ -81,14 +82,16 @@ class BaseDetector(abc.ABC):
 
             img, center, bbox_height = self.predict(img)
 
-            #TODO:REMOVE THIS
-            previous_error_x, previous_error_y = tracker.track(bbox_height, center, (previous_error_x, previous_error_y))
+            # TODO:REMOVE THIS
+            previous_error_x, previous_error_y, previous_error_z = tracker.track(
+                bbox_height, center, (previous_error_x, previous_error_y, previous_error_z))
 
             # Add the FPS to the image and display it
             cv2.putText(
-                img, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2
+                img, f"FPS: {fps:.2f}", (10,
+                                         30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2
             )
-            cv2.imshow("Face detection", img)
+            cv2.imshow("Detector", img)
 
             # Wait for the "q" key to be pressed
             if cv2.waitKey(1) & 0xFF == ord("q"):

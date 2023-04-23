@@ -27,6 +27,8 @@ class ObjectDetector(BaseDetector):
         """
         super().__init__(threshold)
         self.classes_list, self.color_list = self._read_classes()
+        self.model_height = 0
+        self.model_width = 0
         self._download_model(model_url)
         self._load_model()
     
@@ -108,6 +110,11 @@ class ObjectDetector(BaseDetector):
         """
         img.flags.writeable = False
         input_tensor = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        
+        # TODO: Add this back in when the model height and width are known
+        # input_size = (self.model_input_height, self.model_input_width)
+        # input_tensor = cv2.resize(input_tensor, input_size)
+
         input_tensor = tf.convert_to_tensor(input_tensor, dtype=tf.uint8)
         input_tensor = input_tensor[tf.newaxis, ...]
         return input_tensor

@@ -1,7 +1,3 @@
-#:import MDLabel kivymd.uix.label.MDLabel
-#:import MDIconButton kivymd.uix.button.MDIconButton
-#:import MDFloatingActionButton kivymd.uix.button.MDFloatingActionButton
-
 #:kivy 2.1.0
 <LandingUI>:
     BoxLayout:
@@ -17,7 +13,7 @@
         MDFloatingActionButton:
             icon: 'play'
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            on_release: app.switch_layout()
+            on_release: app.switch_layout_to_main()
 
 <MainUI>:
     video: video
@@ -26,7 +22,7 @@
     flight_time: flight_time
     current_speed: current_speed
     temperature: temperature
-    download: download
+    settings: settings
     video_trigger: video_trigger
     action_button: action_button
     FloatLayout:
@@ -68,9 +64,10 @@
                 theme_text_color: 'Secondary'
                 font_style: 'Caption'
         MDFloatingActionButton:
-            id: download
-            icon: 'camera'
+            id: settings
+            icon: 'cogs'
             pos_hint: {'center_x': 0.05, 'center_y': 0.075}
+            on_press: app.switch_layout_to_settings()
         MDFloatingActionButton:
             id: video_trigger
             icon: 'camera'
@@ -80,3 +77,74 @@
             icon: 'play'
             pos_hint: {'center_x': 0.5, 'center_y': 0.075}
             on_press: root.button_handler()
+
+<Settings>:
+    BoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            title: "Settings"
+            anchor_title: "left"
+            left_action_items: [["arrow-left", lambda x: app.switch_layout_to_main()]]
+        MDScrollView:
+            canvas.before:
+                Color:
+                    rgba: app.theme_cls.bg_light
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            MDList:
+                OneLineListItem:
+                    text: "Parameters"
+                    on_release: app.switch_layout_to_parameters()
+                OneLineListItem:
+                    text: "Download models"
+                    on_release: app.switch_layout_to_download()
+
+<Parameters>:
+    BoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            title: "Parameters"
+            anchor_title: "left"
+            left_action_items: [["arrow-left", lambda x: app.switch_layout_to_settings()]]
+        MDScrollView:
+            MDList:
+                OneLineListItem:
+                    text: "Person Height"
+                    on_release: root.show_height_input()
+                OneLineListItem:
+                    text: "Tracking Height and Distance"
+                    on_release: root.show_tracking_input()
+                OneLineListItem:
+                    text: "Model Selection (For Human tracker)"
+                    on_release: root.show_model_selection_select()
+
+<ItemConfirm>
+    on_release: root.set_icon(check)
+
+    CheckboxLeftWidget:
+        id: check
+        group: "check"
+
+<DownloadModels>:
+    selection_list: selection_list
+    BoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            title: "Download models"
+            anchor_title: "left"
+            left_action_items: [["arrow-left", lambda x: app.switch_layout_to_settings()]]
+        MDScrollView:
+            canvas.before:
+                Color:
+                    rgba: app.theme_cls.bg_light
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            MDList:
+                id: selection_list
+        MDFloatingActionButton:
+            id: download
+            icon: 'download'
+            pos_hint: {'center_x': 0.05, 'center_y': 0.075}
+            on_press: root.download_selected_models()
