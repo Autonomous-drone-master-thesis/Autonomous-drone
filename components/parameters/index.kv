@@ -1,0 +1,27 @@
+#:kivy 2.1.0
+<ParametersUI>:
+    BoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            title: "Parameters"
+            anchor_title: "left"
+            left_action_items: [["arrow-left", lambda x: app.switch_layout_to_settings()]]
+        MDScrollView:
+            MDList:
+                OneLineListItem:
+                    text: "Person Height"
+                    on_release: root.show_height_input()
+                OneLineListItem:
+                    text: "Tracking Height and Distance (Human tracker)"
+                    on_release: root.show_tracking_input()
+                OneLineListItem:
+                    text: "Model Selection (Human tracker)"
+                    on_release: root.show_model_selection_select()
+
+<ItemConfirm>
+    on_release: root.set_icon(check)
+
+    CheckboxLeftWidget:
+        id: check
+        group: "check"
+        on_release: root.set_icon(check)

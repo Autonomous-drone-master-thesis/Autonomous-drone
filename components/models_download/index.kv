@@ -1,0 +1,23 @@
+#:kivy 2.1.0
+<ModelsDownloadUI>:
+    selection_list: selection_list
+    BoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            title: "Download models"
+            anchor_title: "left"
+            left_action_items: [["arrow-left", lambda x: app.switch_layout_to_settings()]]
+        MDScrollView:
+            canvas.before:
+                Color:
+                    rgba: app.theme_cls.bg_light
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            MDList:
+                id: selection_list
+        MDFloatingActionButton:
+            id: download
+            icon: 'download'
+            pos_hint: {'center_x': 0.05, 'center_y': 0.075}
+            on_press: root.download_selected_models()

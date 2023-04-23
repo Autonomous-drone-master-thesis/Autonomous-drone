@@ -1,0 +1,16 @@
+#:kivy 2.1.0
+<LandingUI>:
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(20)
+        padding: dp(20)
+        size_hint: (1, 1)
+        MDLabel:
+            text: "Welcome to the Landing Page"
+            halign: 'center'
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            font_style: 'H4'
+        MDFloatingActionButton:
+            icon: 'play'
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            on_release: app.switch_layout_to_main()

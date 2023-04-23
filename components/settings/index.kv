@@ -1,0 +1,22 @@
+#:kivy 2.1.0
+<SettingsUI>:
+    BoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            title: "Settings"
+            anchor_title: "left"
+            left_action_items: [["arrow-left", lambda x: app.switch_layout_to_main()]]
+        MDScrollView:
+            canvas.before:
+                Color:
+                    rgba: app.theme_cls.bg_light
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            MDList:
+                OneLineListItem:
+                    text: "Parameters"
+                    on_release: app.switch_layout_to_parameters()
+                OneLineListItem:
+                    text: "Download models"
+                    on_release: app.switch_layout_to_download()
