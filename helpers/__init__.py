@@ -1,4 +1,4 @@
 from .model_scraper import ModelScraper, ModelScraperError
 from .model_downloader import ModelDownloader
-from .file_handlers.models_handler import ModelsHandler
-from .file_handlers.settings_handler import SettingsHandler, SettingsKeys
+from .file_handlers import ModelsHandler, SettingsHandler, SettingsKeys
+from .kv_file_loader import load_kv_file_for_class
