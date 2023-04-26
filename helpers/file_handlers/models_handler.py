@@ -1,6 +1,9 @@
 """This module defines the ModelsHandler class for managing model-related data."""
 
+import logging
 from typing import Any
+
+from kivy.logger import Logger
 
 from .base_handler import BaseHandler
 
@@ -9,7 +12,7 @@ class ModelsHandler(BaseHandler):
     """
     The ModelsHandler class manages model-related data in a JSON file.
     """
-    def __init__(self, data_directory: str):
+    def __init__(self, data_directory: str) -> None:
         self.default_values = {}
         super().__init__(data_directory, "models.json")
 
@@ -21,6 +24,7 @@ class ModelsHandler(BaseHandler):
         :param value: the new value for the setting.
         """
 
+        Logger.info("Models Handler: Setting a model %s to %s", key, value)
         models = self.read_data()
         models[key] = value
         self.write_data(models)
@@ -33,5 +37,6 @@ class ModelsHandler(BaseHandler):
         :return: the value of the setting.
         """
 
+        Logger.info("Models Handler: Getting a model value for %s", key)
         settings = self.read_data()
         return settings.get(key)

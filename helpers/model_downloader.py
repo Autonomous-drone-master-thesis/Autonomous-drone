@@ -3,13 +3,12 @@ Module for downloading models concurrently using asyncio and aiohttp.
 """
 
 import asyncio
-import logging
 import os
 import threading
 from typing import Callable, Optional
 
 import aiohttp
-
+from kivy.logger import Logger
 # pylint: disable=E0611
 from tensorflow.python.keras.utils.data_utils import get_file
 
@@ -18,6 +17,7 @@ from .file_handlers import ModelsHandler
 #TODO: Remove this
 os.environ['http_proxy'] = 'http://10.246.170.130:3128'
 os.environ['https_proxy'] = 'https://10.246.170.130:3128'
+
 
 class ModelDownloader:
     """
@@ -30,7 +30,6 @@ class ModelDownloader:
         models_handler: ModelsHandler,
         cache_dir: Optional[str] = None,
         callback: Optional[Callable[[str], None]] = None,
-        logger: Optional[logging.Logger] = None,
     ) -> None:
         """
         Initialize the ModelDownloader object with the specified cache directory and callback.
@@ -40,13 +39,11 @@ class ModelDownloader:
         :param cache_dir: Optional; the directory where the downloaded models will be stored.
                           If not provided, defaults to './models/'.
         :param callback: Optional; a function to be called with the path of each downloaded model.
-        :param logger: A logger instance to use for logging messages.
         """
         self._data_path = data_path
         self._models_handler = models_handler
         self._cache_dir = cache_dir or "./models/"
         self._callback = callback
-        self._logger = logger or logging.getLogger(__name__)
         self._downloaded_models = []
 
     def download_models_threaded(self, model_urls: list) -> None:
@@ -55,13 +52,22 @@ class ModelDownloader:
 
         :param model_urls: A list of URLs of the models to download.
         """
+        Logger.info("Model Downloader: Creating threads...")
         threading.Thread(target=self._download_models_async, args=(model_urls,)).start()
 
     def _download_models_async(self, model_urls: list) -> None:
+        """
+        Asynchronously download the models from the given URLs.
+
+        Args:
+            model_urls (list): List of URLs of the models to download.
+        """
+        Logger.info("Model Downloader: Starting async download...")
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         loop.run_until_complete(self.download_models(model_urls))
         loop.close()
+        Logger.info("Model Downloader: Async download finished.")
 
         self._remove_archive_files()
         self._save_path_to_models()
@@ -93,8 +99,13 @@ class ModelDownloader:
         :param model: A dictionary with model information.
         """
         download_link = model["download_link"]
-
         file_name = os.path.basename(download_link)
+
+        Logger.info(
+            "Model Downloader: Downloading model %s from %s...",
+            model['model_name'],
+            download_link
+            )
 
         os.makedirs(self._cache_dir, exist_ok=True)
 
@@ -106,6 +117,8 @@ class ModelDownloader:
             download_link,
             self._cache_dir
             )
+
+        Logger.info("Model Downloader: %s model downloaded successfully.", model['model_name'])
 
         model_name = model["model_name"]
 
@@ -124,10 +137,11 @@ class ModelDownloader:
         """
         folder_path = f"{self._cache_dir}checkpoints/"
 
+        Logger.info("Model Downloader: Removing archive files...")
         for file in os.listdir(folder_path):
             if file.endswith(".tar.gz") and os.path.isfile(os.path.join(folder_path, file)):
                 os.remove(os.path.join(folder_path, file))
-                self._logger.info(f"Removed file:{file}")
+                Logger.info("Model Downloader: %s", file)
 
     def _save_path_to_models(self) -> None:
         """
@@ -135,10 +149,10 @@ class ModelDownloader:
         """
         existing_models = self._models_handler.read_data()
 
-        self._logger.info("Saving path models")
+        Logger.info("Model Downloader: Saving path models")
         for downloaded_model in self._downloaded_models:
             model = existing_models[downloaded_model[0]]
             model["downloaded_path"] = downloaded_model[1]
             model["downloaded"] = True
         self._models_handler.write_data(existing_models)
-        self._logger.info("Models modified successfully")
+        Logger.info("Model Downloader: Models modified successfully")

@@ -1,9 +1,11 @@
 """This module defines the BaseHandler class for handling file-based data storage."""
 
+from abc import ABC, abstractmethod
 import json
 import os
-from abc import ABC, abstractmethod
 from typing import Any, Dict, Union
+
+from kivy.logger import Logger
 
 
 class BaseHandler(ABC):
@@ -12,7 +14,11 @@ class BaseHandler(ABC):
     """
     default_values = {}
 
-    def __init__(self, data_directory: str, file_name: str):
+    def __init__(
+        self,
+        data_directory: str,
+        file_name: str
+        ) -> None:
         """
         Initialize the BaseHandler object with the specified file path.
 
@@ -25,7 +31,7 @@ class BaseHandler(ABC):
             os.mkdir(data_directory)
 
         if not os.path.exists(self.file_path):
-            self._create_file()
+            self._create_default_file()
 
     @abstractmethod
     def set_value(self, key: Union[str, "SettingsKeys"], value: Any) -> None:
@@ -39,10 +45,11 @@ class BaseHandler(ABC):
         Get the value associated with the given key from the data file.
         """
 
-    def _create_file(self) -> None:
+    def _create_default_file(self) -> None:
         """
         Create the file with default values.
         """
+        Logger.info("Base Handler: Creating default file - %s", self.file_path)
         self.write_data(self.default_values)
 
     def read_data(self) -> Dict[str, Any]:
@@ -51,6 +58,7 @@ class BaseHandler(ABC):
 
         :return: The data dictionary.
         """
+        Logger.info("Base Handler: Reading file - %s", self.file_path)
         with open(self.file_path, "r", encoding="utf-8") as file:
             return json.load(file)
 
@@ -60,5 +68,6 @@ class BaseHandler(ABC):
 
         :param data: New data dictionary.
         """
+        Logger.info("Base Handler: Writing to file - %s", self.file_path)
         with open(self.file_path, "w+", encoding="utf-8") as file:
             json.dump(new_data, file, indent=4)

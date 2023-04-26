@@ -1,6 +1,7 @@
 """This module contains the ParametersUI class, which is responsible for 
 displaying the parameters settings page."""
 
+from kivy.logger import Logger
 from kivy.uix.boxlayout import BoxLayout
 
 from helpers import load_kv_file_for_class, SettingsKeys
@@ -23,6 +24,7 @@ class ParametersUI(BoxLayout):
 
     def show_height_input(self) -> None:
         """Show the height input dialog for entering the person's height."""
+        Logger.info("Parameters Component: Showing height input dialog")
         dialog = HeightInputDialog(self.save_height)
         dialog.open()
 
@@ -32,10 +34,12 @@ class ParametersUI(BoxLayout):
         
         :param height: The person's height.
         """
+        Logger.info("Parameters Component: Saving height: %s", height)
         self.main_app.settings_handler.set_value(SettingsKeys.PERSON_HEIGHT, height)
 
     def show_tracking_input(self) -> None:
         """Show the tracking input dialog for entering the tracking height and distance."""
+        Logger.info("Parameters Component: Showing tracking input dialog")
         dialog = TrackingInputDialog(self.save_tracking)
         dialog.open()
 
@@ -46,12 +50,17 @@ class ParametersUI(BoxLayout):
         :param height: The tracking height.
         :param distance: The tracking distance.
         """
+        Logger.info(
+            "Parameters Component: Saving tracking height: %s and distance: %s",
+            height,
+            distance
+            )
         self.main_app.settings_handler.set_value(SettingsKeys.TRACKING_HEIGHT, height)
         self.main_app.settings_handler.set_value(SettingsKeys.TRACKING_DISTANCE, distance)
 
     def show_model_selection_select(self) -> None:
         """Show the model selection dialog for choosing a human tracker model."""
-
+        Logger.info("Parameters Component: Showing model selection dialog")
         current_settings = self.main_app.settings_handler.get_value(
             SettingsKeys.SELECTED_OBJECT_DETECTION_MODEL
             )
@@ -69,10 +78,8 @@ class ParametersUI(BoxLayout):
 
     def save_model_selection(self) -> None:
         """Save the selected human tracker model."""
-        if self.selected_model is not None:
-            self.main_app.settings_handler.set_value(
-                SettingsKeys.SELECTED_OBJECT_DETECTION_MODEL,
-                self.selected_model
-            )
-        else:
-            print("No model selected")
+        Logger.info("Parameters Component: Saving model selection: %s", self.selected_model)
+        self.main_app.settings_handler.set_value(
+            SettingsKeys.SELECTED_OBJECT_DETECTION_MODEL,
+            self.selected_model
+        )

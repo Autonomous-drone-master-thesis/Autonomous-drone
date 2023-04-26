@@ -1,11 +1,23 @@
 """Main module of the application."""
-import logging
 
+import datetime
+import logging
+import os
+
+from kivy.logger import Logger
 from kivymd.app import MDApp
 
 from helpers import SettingsHandler, ModelsHandler, ModelScraper, ModelScraperError
 
 from components import LandingUI, MainUI, ModelsDownloadUI, ParametersUI, SettingsUI
+
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+
+file_name = datetime.datetime.now().strftime("session_%Y-%m-%d_%H-%M-%S.log")
+file_handler = logging.FileHandler(os.path.join('logs', file_name))
+file_handler.setLevel(logging.INFO)
+Logger.addHandler(file_handler)
 
 DATA_PATH = "data"
 
@@ -36,6 +48,7 @@ class MainApp(MDApp):
         """
         Switch the layout to the main layout.
         """
+        Logger.info("Switching UI: MainUI")
         new_layout = MainUI()
         self.root.clear_widgets()
         self.root.add_widget(new_layout)
@@ -45,6 +58,7 @@ class MainApp(MDApp):
         """
         Switch the layout to the models download layout.
         """
+        Logger.info("Switching UI: ModelsDownloadUI")
         new_layout = ModelsDownloadUI(self.models_handler, self.data_path)
         self.root.clear_widgets()
         self.root.add_widget(new_layout)
@@ -54,6 +68,7 @@ class MainApp(MDApp):
         """
         Switch the layout to the settings layout.
         """
+        Logger.info("Switching UI: SettingsUI")
         new_layout = SettingsUI()
         self.root.clear_widgets()
         self.root.add_widget(new_layout)
@@ -63,8 +78,8 @@ class MainApp(MDApp):
         """
         Switch the layout to the parameters layout.
         """
-        print("Switching to parameters layout")
-        new_layout = ParametersUI(main_app=self)
+        Logger.info("Switching UI: ParametersUI")
+        new_layout = ParametersUI(self)
         self.root.clear_widgets()
         self.root.add_widget(new_layout)
         self.current_layout = new_layout
@@ -79,7 +94,7 @@ class MainApp(MDApp):
                 models = scraper.scrape()
                 scraper.save(models)
             except ModelScraperError as exc:
-                logging.error("An error occurred while using the ModelScraper: %s", str(exc))
+                Logger.error("An error occurred while using the ModelScraper: %s", str(exc))
 
 
 if __name__ == "__main__":

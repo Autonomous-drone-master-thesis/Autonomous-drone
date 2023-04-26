@@ -4,3 +4,4 @@ __pycache__
 models/
 data/
 *.mp4
+*.log

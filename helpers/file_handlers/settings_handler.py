@@ -3,6 +3,8 @@
 import enum
 from typing import Any
 
+from kivy.logger import Logger
+
 from .base_handler import BaseHandler
 
 
@@ -24,7 +26,7 @@ class SettingsHandler(BaseHandler):
     The SettingsHandler class manages application settings data in a JSON file.
     """
 
-    def __init__(self, data_directory: str):
+    def __init__(self, data_directory: str) -> None:
         self.default_values = {
             "models_last_scrape_time": 0,
             "person_height": None,
@@ -42,8 +44,10 @@ class SettingsHandler(BaseHandler):
         :param value: the new value for the setting.
         """
         if key not in SettingsKeys:
+            Logger.error("Settings Handler: Invalid setting key %s", key)
             raise ValueError(f"Invalid setting key: {key}")
 
+        Logger.info("Settings Handler: Setting a setting %s to %s", key.value, value)
         settings = self.read_data()
         settings[key.value] = value
         self.write_data(settings)
@@ -56,7 +60,9 @@ class SettingsHandler(BaseHandler):
         :return: the value of the setting.
         """
         if key not in SettingsKeys:
-            raise ValueError(f"Invalid setting key: {key}")
+            Logger.error("Settings Handler: Invalid setting key - %s", key)
+            raise ValueError(f"Invalid setting key - {key}")
 
+        Logger.info("Settings Handler: Getting a setting value for %s", key.value)
         settings = self.read_data()
         return settings.get(key.value)

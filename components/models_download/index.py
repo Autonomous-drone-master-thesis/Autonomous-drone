@@ -3,7 +3,7 @@ displaying the models download UI."""
 
 from typing import Callable
 
-#pylint: disable=E0611
+# pylint: disable=E0611
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.selectioncontrol import MDCheckbox
@@ -18,6 +18,7 @@ class ModelListItem(TwoLineAvatarIconListItem):
     """
     Item for the list of models to download.
     """
+
     def __init__(self, model: dict, **kwargs):
         super().__init__(**kwargs)
         self.download_link = model["download_link"]
@@ -35,6 +36,7 @@ class ModelListItemRight(IRightBodyTouch, MDCheckbox):
     """
     Right side of the list item, contains the checkbox.
     """
+
     def __init__(self, model: dict, on_check: Callable, **kwargs):
         super().__init__(**kwargs)
         self.model = model
@@ -53,11 +55,10 @@ class ModelListItemRight(IRightBodyTouch, MDCheckbox):
 
 class ModelsDownloadUI(BoxLayout):
     """
-    ModelsDownloadUI class is a BoxLayout that displays the models download page 
+    ModelsDownloadUI class is a BoxLayout that displays the models download page
     of the application.
-    Args:
-        model_handler (ModelsHandler): ModelsHandler instance.
-        data_path (str): Path to the data folder."""
+    """
+
     selection_list = ObjectProperty(None)
 
     def __init__(self, model_handler: ModelsHandler, data_path: str, **kwargs) -> None:
@@ -71,6 +72,7 @@ class ModelsDownloadUI(BoxLayout):
         """
         Downloads the selected models.
         """
+
         # TODO: Add notification call instead of print
         def on_complete(model_name):
             print(f"Downloaded {model_name}")
@@ -89,7 +91,7 @@ class ModelsDownloadUI(BoxLayout):
                 list_item.add_widget(ModelListItemRight(model, self._on_model_check))
                 self.selection_list.add_widget(list_item)
 
-    #TODO: Unify docstrings
+    # TODO: Unify doc-strings
     def _on_model_check(self, model: dict, is_checked: bool) -> None:
         """Callback for when a model is checked or unchecked.
 

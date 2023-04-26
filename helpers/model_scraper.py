@@ -1,10 +1,10 @@
 """This module defines the ModelScraper class for scraping and managing model data."""
 
 import re
-import logging
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional, Union
 
+from kivy.logger import Logger
 import requests
 
 from .file_handlers import SettingsHandler, SettingsKeys, ModelsHandler
@@ -34,7 +34,6 @@ class ModelScraper:
         directory_path: str,
         settings_handler: SettingsHandler,
         models_handler: ModelsHandler,
-        logger: Optional[logging.Logger] = None,
     ):
         """
         Initializes the ModelScraper class.
@@ -42,13 +41,11 @@ class ModelScraper:
         :param directory_path: The path to the directory where the models.json file is stored.
         :param settings_handler: The SettingsHandler object.
         :param models_handler: The ModelsHandler object.
-        :param logger: A logger instance to use for logging messages.
         """
         self._directory_path = directory_path
         self._settings_handler = settings_handler
         self._models_handler = models_handler
         self._current_datetime = datetime.now()
-        self._logger = logger or logging.getLogger(__name__)
 
     def should_scrape(self) -> bool:
         """
@@ -69,9 +66,9 @@ class ModelScraper:
 
         :raises ModelScraperError: If there's a connection error or an error fetching the file.
         """
-        self._logger.info("Fetching model data from GitHub...")
+        Logger.info("Model Scraper: Fetching model data from GitHub...")
         data = self._get_md_file_from_github()
-        self._logger.info("Extracting models information...")
+        Logger.info("Model Scraper: Extracting models information...")
         models = self._extract_models(data)
         return models
 
@@ -82,10 +79,10 @@ class ModelScraper:
         :param models: The list of dictionaries containing model information.
         """
         existing_models = self._models_handler.read_data()
-        self._logger.info("Saving models")
+        Logger.info("Model Scraper: Saving models")
         merged_models = {**models, **existing_models}
         self._models_handler.write_data(merged_models)
-        self._logger.info("Models saved successfully")
+        Logger.info("Model Scraper: Models saved successfully")
         self._settings_handler.set_value(
             SettingsKeys.MODELS_LAST_SCRAPE_TIME,
             self._current_datetime.timestamp()
@@ -100,15 +97,13 @@ class ModelScraper:
         try:
             response = requests.get(ModelScraper.MODELS_URL, timeout=10)
         except requests.exceptions.ConnectionError as exc:
-            self._logger.error(f"Connection error while fetching the file: {str(exc)}")
-            raise ModelScraperError("Connection error while fetching the file.") from exc
+            raise ModelScraperError(
+                f"Connection error while fetching the file: {str(exc)}"
+                ) from exc
 
         if response.status_code == 200:
             return response.text
 
-        self._logger.error(
-            f"Error fetching the file: {response.status_code} - {response.reason}"
-            )
         raise ModelScraperError(
             f"Error fetching the file: {response.status_code} - {response.reason}"
             )
