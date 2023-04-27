@@ -1,9 +1,11 @@
 import math
-from typing import Tuple
+from typing import Tuple, TYPE_CHECKING
 
 import numpy as np
 
-from handlers import TelloHandler
+if TYPE_CHECKING:
+    from handlers import TelloHandler
+
 
 
 class HumanTracker:
@@ -11,7 +13,7 @@ class HumanTracker:
 
     def __init__(
         self,
-        drone: TelloHandler,
+        drone: "TelloHandler",
         target_distance: int = 500,
         target_height: int = 400,
         real_height: int = 180

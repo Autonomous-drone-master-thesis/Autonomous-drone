@@ -1,19 +1,17 @@
 """Module for the FaceTracker class."""
-from typing import Tuple
+from typing import Tuple, TYPE_CHECKING
 
-try:
-    import numpy as np
-except ImportError:
-    np = None
+import numpy as np
 
-from handlers import TelloHandler
+if TYPE_CHECKING:
+    from handlers import TelloHandler
 
 
 # pylint: disable=R0903
 class FaceTracker:
     """Class for tracking faces."""
 
-    def __init__(self, drone: TelloHandler) -> None:
+    def __init__(self, drone: "TelloHandler") -> None:
         """Initialize the FaceTracker object with the given drone.
 
         Args:
