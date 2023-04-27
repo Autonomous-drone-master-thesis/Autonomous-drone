@@ -1,42 +1,36 @@
-"""Module for performing object detection."""
+"""Module for performing human detection."""
 
-import os
 from typing import Dict, Tuple, Any
 
-try:
-    import cv2
-    import numpy as np
-    import tensorflow as tf
-    from tensorflow.python.keras.utils.data_utils import get_file
-except ImportError:
-    cv2 = None
-    np = None
-    tf = None
-    get_file = None
+import cv2
+import numpy as np
+import tensorflow as tf
 
 from .base_detector import BaseDetector
 
 
-class ObjectDetector(BaseDetector):
+class HumanDetector(BaseDetector):
     """Class for performing object detection on videos."""
 
-    def __init__(self, model_url: str, threshold: float = 0.5) -> None:
+    def __init__(self, model_path: str, threshold: float = 0.5) -> None:
         """
-        Initialize the ObjectDetector object with the given threshold.
+        Initialize the HumanDetector object with the given threshold.
+        :param model_path: the path to the model to use for object detection
         :param threshold: the minimum confidence score for a detected object to be considered valid
         """
         super().__init__(threshold)
+        self.model_path = model_path
         self.classes_list, self.color_list = self._read_classes()
         self.model_height = 0
         self.model_width = 0
-        self._download_model(model_url)
         self._load_model()
-    
+
     def predict(self, img: np.ndarray) -> Tuple[np.ndarray, Tuple[int, int], float]:
         """
         Perform object detection on the input image and return the resulting
         :param img: the input image to perform object detection on
-        :return: the resulting image with the bounding boxes added
+        :return: the resulting image with the bounding boxes added,
+        the center of the bounding box, and the height of the bounding box
         """
         # Set the image to read-only mode to improve performance
         img.flags.writeable = False
@@ -46,8 +40,8 @@ class ObjectDetector(BaseDetector):
         # Set the image back to writeable mode
         img.flags.writeable = True
 
-        img, center, bbox_height = self._visualize_bounding_box(img, results)
-        return img, center, bbox_height
+        detected, img, center, bbox_height = self._visualize_bounding_box(img, results)
+        return detected, img, center, bbox_height
 
     def _read_classes(self) -> Tuple[list[str], np.ndarray[Any, np.dtype[np.float64]]]:
         """
@@ -62,35 +56,13 @@ class ObjectDetector(BaseDetector):
 
         return classes_list, color_list
 
-    def _download_model(self, model_url: str) -> None:
-        """
-        Download the object detection model from the given URL.
-        :param model_url: the URL of the object detection model
-        """
-        self.logger.info("Downloading model")
-        file_name = os.path.basename(model_url)
-        self.model_name = file_name[: file_name.index(".")]
-
-        self.cache_dir = "./models/"
-        os.makedirs(self.cache_dir, exist_ok=True)
-        get_file(
-            fname=file_name,
-            origin=model_url,
-            cache_dir=self.cache_dir,
-            cache_subdir="checkpoints",
-            extract=True,
-        )
-        self.logger.info("Model downloaded")
-
     def _load_model(self) -> None:
         """
         Load the object detection model from the checkpoint directory.
         """
         self.logger.info("Loading model")
         tf.keras.backend.clear_session()
-        self.model = tf.saved_model.load(
-            os.path.join(self.cache_dir, "checkpoints", self.model_name, "saved_model")
-        )
+        self.model = tf.saved_model.load(self.model_path)
         self.logger.info("Model loaded")
 
     def _model_process(self, img):
@@ -110,7 +82,7 @@ class ObjectDetector(BaseDetector):
         """
         img.flags.writeable = False
         input_tensor = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        
+
         # TODO: Add this back in when the model height and width are known
         # input_size = (self.model_input_height, self.model_input_width)
         # input_tensor = cv2.resize(input_tensor, input_size)
@@ -119,9 +91,7 @@ class ObjectDetector(BaseDetector):
         input_tensor = input_tensor[tf.newaxis, ...]
         return input_tensor
 
-    def _visualize_bounding_box(
-        self, img: np.ndarray, detections: Dict[str, tf.Tensor]
-    ) -> np.ndarray:
+    def _visualize_bounding_box(self, img: np.ndarray, detections: Dict[str, tf.Tensor]) -> np.ndarray:
         """
         Visualize the bounding boxes around the detected objects.
         :param img: the input image with the detected objects
@@ -132,15 +102,21 @@ class ObjectDetector(BaseDetector):
 
         height, width, _ = img.shape
 
+        person_index = self.classes_list.index("person")
+        human_found = False
+        if tf.size(bbox_idx) > 0:
+            human_boxes = [(box, class_scores[box]) for box in bbox_idx if class_indexes[box] == person_index]
+
+            if human_boxes:
+                human_found = True
+
         img, center, bbox_height = self._draw_bounding_boxes(
             img, bbox_idx, bboxs, class_indexes, class_scores, height, width
         )
 
-        return img, center, bbox_height
+        return human_found, img, center, bbox_height
 
-    def _get_bounding_boxes(
-        self, detections: dict
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    def _get_bounding_boxes(self, detections: dict) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
         Extract the bounding boxes, class indexes,
         and class scores from the object detection results.
@@ -164,6 +140,7 @@ class ObjectDetector(BaseDetector):
         return bbox_idx, bboxs, class_indexes, class_scores
 
     # pylint: disable=R0913, R0914
+    # TODO: Mode the if statement into a separate function. Possibly _visualize_bounding_box.
     def _draw_bounding_boxes(
         self,
         img: np.ndarray,
@@ -211,9 +188,7 @@ class ObjectDetector(BaseDetector):
                 )
 
                 cv2.rectangle(img, (xmin, ymin), (xmax, ymax), color, 2)
-                cv2.putText(
-                    img, label, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
-                )
+                cv2.putText(img, label, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
                 center = (int((xmin + xmax) / 2), int((ymin + ymax) / 2))
                 bbox_height = ymax - ymin

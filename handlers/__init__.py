@@ -1,2 +1,2 @@
 """Module for handlers."""
-from .handler import TelloHandler
+from .tello_handler import TelloHandler

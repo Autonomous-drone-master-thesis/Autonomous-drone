@@ -49,7 +49,7 @@ class MainApp(MDApp):
         Switch the layout to the main layout.
         """
         Logger.info("Switching UI: MainUI")
-        new_layout = MainUI()
+        new_layout = MainUI(self.settings_handler)
         self.root.clear_widgets()
         self.root.add_widget(new_layout)
         self.current_layout = new_layout

@@ -1,21 +1,15 @@
 """Module containing the BaseDetector class."""
 
-import abc
+from abc import ABC, abstractmethod
 import logging
 import time
-from typing import Union, Any
+from typing import Any, Tuple, Union
 
-from trackers.human_tracker import HumanTracker
-
-try:
-    import cv2
-    import numpy as np
-except ImportError:
-    cv2 = None
-    np = None
+import cv2
+import numpy as np
 
 
-class BaseDetector(abc.ABC):
+class BaseDetector(ABC):
     """Base class for all detection models."""
 
     def __init__(self, threshold: float = 0.5) -> None:
@@ -27,13 +21,22 @@ class BaseDetector(abc.ABC):
         self.logger = logging.getLogger(__name__)
         self.model = None
 
-    @abc.abstractmethod
+    @abstractmethod
+    def predict(self, img: np.ndarray) -> Tuple[np.ndarray, Union[Tuple[int, int], None], Union[float, None]]:
+        """
+        Perform object detection on the input image.
+        :param img: the input image to perform object detection on
+        :return: the resulting image with the bounding boxes added,
+        the center of the bounding box, and the metric (area or height) of the bounding box
+        """
+
+    @abstractmethod
     def _load_model(self) -> None:
         """
         Abstract method for loading the object detection model.
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def _preprocess_image(self, img: np.ndarray) -> np.ndarray:
         """
         Abstract method for preprocessing the input image.
@@ -41,7 +44,7 @@ class BaseDetector(abc.ABC):
         :return: the preprocessed image
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def _visualize_bounding_box(self, img: np.ndarray, detections: Any) -> np.ndarray:
         """
         Abstract method for visualizing the bounding boxes around the detected objects.
@@ -50,7 +53,7 @@ class BaseDetector(abc.ABC):
         :return: the image with the bounding boxes added
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def _model_process(self, img: np.ndarray) -> Any:
         """
         Abstract method for performing the object detection.
@@ -66,10 +69,6 @@ class BaseDetector(abc.ABC):
         cap = self._initiate_video_writer(video)
         self.logger.info("Video initiated.")
 
-        # TODO:REMOVE THIS
-        tracker = HumanTracker("drone_placeholder")
-        previous_error_x, previous_error_y, previous_error_z = 0, 0, 0
-
         success, img = cap.read()
         start_time = 0
 
@@ -80,17 +79,12 @@ class BaseDetector(abc.ABC):
             fps = 1 / (current_time - start_time)
             start_time = current_time
 
-            img, center, bbox_height = self.predict(img)
-
-            # TODO:REMOVE THIS
-            previous_error_x, previous_error_y, previous_error_z = tracker.track(
-                bbox_height, center, (previous_error_x, previous_error_y, previous_error_z))
+            detected, img, center, bbox_height = self.predict(img)
+            
+            print(detected)
 
             # Add the FPS to the image and display it
-            cv2.putText(
-                img, f"FPS: {fps:.2f}", (10,
-                                         30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2
-            )
+            cv2.putText(img, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             cv2.imshow("Detector", img)
 
             # Wait for the "q" key to be pressed

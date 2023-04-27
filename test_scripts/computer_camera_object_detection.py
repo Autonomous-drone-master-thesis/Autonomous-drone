@@ -1,17 +1,17 @@
 import logging
 
-from detectors import ObjectDetector
+from detectors import HumanDetector
 
 logging.basicConfig(level=logging.INFO)
 
 model_path = (
-    "http://download.tensorflow.org/models/object_detection/tf2/20200711/ssd_mobilenet_v2_320x320_coco17_tpu-8.tar.gz"
+    "./models/checkpoints/centernet_resnet101_v1_fpn_512x512_coco17_tpu-8/saved_model"
 )
 
-# video_path = 0
-video_path = "1682006597205.mp4"
+video_path = 0
+#video_path = "1682006597205.mp4"
 
 threshold = 0.5
 
-detector = ObjectDetector(model_path, threshold)
+detector = HumanDetector(model_path, threshold)
 detector.predict_video(video_path)

@@ -2,14 +2,9 @@
 
 from typing import Tuple
 
-try:
-    import cv2
-    import mediapipe as mp
-    import numpy as np
-except ImportError:
-    cv2 = None
-    mp = None
-    np = None
+import cv2
+import mediapipe as mp
+import numpy as np
 
 from .base_detector import BaseDetector
 
@@ -29,7 +24,8 @@ class FaceDetector(BaseDetector):
         """
         Perform object detection on the input image and return the resulting
         :param img: the input image to perform object detection on
-        :return: the resulting image with the bounding boxes added
+        :return: the resulting image with the bounding boxes added,
+        the center of the bounding box, and the area of the bounding box
         """
         # Set the image to read-only mode to improve performance
         img.flags.writeable = False
@@ -39,8 +35,8 @@ class FaceDetector(BaseDetector):
         # Set the image back to writeable mode
         img.flags.writeable = True
 
-        img, middle, area = self._visualize_bounding_box(img, results)
-        return img, middle, area
+        detected, img, center, area = self._visualize_bounding_box(img, results)
+        return detected, img, center, area
 
     def _load_model(self) -> None:
         """
@@ -72,24 +68,27 @@ class FaceDetector(BaseDetector):
 
     def _visualize_bounding_box(
         self, img: np.ndarray, detections: mp.solutions.face_detection.FaceDetection
-    ) -> Tuple[np.ndarray, Tuple[int, int], float]:
+    ) -> Tuple[bool, np.ndarray, Tuple[int, int], float]:
         """
         Visualize the bounding boxes around the detected faces.
         :param img: the input image with the detected faces
         :param results: the face detection results
-        :return: the image with the bounding boxes added
+        :return: the resulting image with the bounding boxes added,
+        TODO: Docstring
         """
         face_centers = []
         face_areas = []
+        face_found = False
         if detections.detections:
+            face_found = True
             for detection in detections.detections:
                 middle, area, x, y = self._get_box_coordinates(img, detection)
                 face_centers.append(middle)
                 face_areas.append(area)
                 self._draw_bounding_boxes(img, detection, x, y)
             closest_face_index = face_areas.index(max(face_areas))
-            return img, face_centers[closest_face_index], face_areas[closest_face_index]
-        return img, (0, 0), 0.0
+            return face_found, img, face_centers[closest_face_index], face_areas[closest_face_index]
+        return face_found, img, (0, 0), 0.0
 
     def _get_box_coordinates(
         self, img: np.ndarray, detection: mp.solutions.face_detection.FaceDetection

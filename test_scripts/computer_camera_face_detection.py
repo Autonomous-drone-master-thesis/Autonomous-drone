@@ -1,8 +1,5 @@
-import logging
-
 from detectors import FaceDetector
 
-logging.basicConfig(level=logging.INFO)
 video_path = 0
 #video_path = "video1.mp4"
 
