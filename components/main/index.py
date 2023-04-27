@@ -54,7 +54,7 @@ class MainUI(FloatLayout):
         Private method that stops the drone and the video feed.
         """
         self._update_running_status()
-        # Clock.unschedule(self._update_video_feed)
+        Clock.unschedule(self._update_video_feed)
         self.drone.disconnect()
 
     def _show_tracker_selection_dialog(self) -> None:
@@ -82,6 +82,7 @@ class MainUI(FloatLayout):
                 self.drone.record_video = True
             else:
                 self.drone.record_video = False
+            Clock.schedule_interval(self._update_video_feed, 1 / 60)
 
         VideoSelectionDialog(set_video_record).open()
 
