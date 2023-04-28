@@ -1,5 +1,6 @@
 from detectors import FaceDetector
 
+# 0 for computer camera, or path to video file
 video_path = 0
 #video_path = "video1.mp4"
 

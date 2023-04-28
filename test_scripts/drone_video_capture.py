@@ -45,11 +45,7 @@ class Drone:
         self.recording = False
         self.recorder_thread.join()
 
-
-def main():
+if __name__ == "__main__":
     drone = Drone()
     drone.start_recording()
     drone.run()
-
-if __name__ == "__main__":
-    main()
