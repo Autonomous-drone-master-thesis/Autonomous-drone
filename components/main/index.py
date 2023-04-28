@@ -9,8 +9,7 @@ from kivy.uix.floatlayout import FloatLayout
 from handlers import TelloHandler
 
 # import utilities
-from helpers import load_kv_file_for_class
-from helpers import SettingsHandler, SettingsKeys
+from helpers import load_kv_file_for_class, SettingsHandler, SettingsKeys
 
 # import components
 from .start_tracking_selection import StartTrackingSelectionDialog
@@ -35,8 +34,8 @@ class MainUI(FloatLayout):
         self.detected = False
 
         # Start listening to the drone
-        Clock.schedule_interval(self._update_battery, 1)
-        Clock.schedule_interval(self._update_temperature, 1)
+        #Clock.schedule_interval(self._update_battery, 1)
+        #Clock.schedule_interval(self._update_temperature, 1)
 
     def button_handler(self) -> None:
         """

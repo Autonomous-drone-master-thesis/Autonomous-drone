@@ -1,0 +1,17 @@
+#:kivy 2.1.0
+<DebugUI>:
+    BoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            title: "Debug"
+            anchor_title: "left"
+            left_action_items: [["arrow-left", lambda x: app.switch_layout_to_settings()]]
+        MDScrollView:
+            MDList:
+                OneLineListItem:
+                    text: root.debug_mode_text
+                    on_release: root.toggle_debug_mode()
+                OneLineListItem:
+                    text: "Logs"
+                    disabled: not root.debug_mode
+                    on_release: app.switch_layout_to_logs()

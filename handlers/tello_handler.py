@@ -65,9 +65,9 @@ class TelloHandler(Tello):
         :param debug: Whether to return the debug image or not."""
         img = self.get_frame_read().frame
         if isinstance(self.tracker, FaceTracker):
-            detected, debug_img, middle, area = self.detector.predict(img)
+            detected, debug_img, center, area = self.detector.predict(img)
             if track:
-                self.previous_error = self.tracker.track(area, middle, self.previous_error)
+                self.previous_error = self.tracker.track(area, center, self.previous_error)
 
         elif isinstance(self.tracker, HumanTracker):
             detected, debug_img, center, bbox_height = self.detector.predict(img)

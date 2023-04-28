@@ -9,14 +9,28 @@ from kivymd.app import MDApp
 
 from helpers import SettingsHandler, ModelsHandler, ModelScraper, ModelScraperError
 
-from components import LandingUI, MainUI, ModelsDownloadUI, ParametersUI, SettingsUI
+from components import (
+    DebugUI,
+    LandingUI,
+    LogsUI,
+    MainUI,
+    ModelsDownloadUI,
+    ParametersUI,
+    SettingsUI
+)
 
 if not os.path.exists('logs'):
     os.makedirs('logs')
 
-file_name = datetime.datetime.now().strftime("session_%Y-%m-%d_%H-%M-%S.log")
-file_handler = logging.FileHandler(os.path.join('logs', file_name))
+log_file_name = datetime.datetime.now().strftime("session_%Y-%m-%d_%H-%M-%S.log")
+log_file_path = os.path.join('logs', log_file_name)
+
+formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+
+file_handler = logging.FileHandler(log_file_path)
 file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(formatter)
+
 Logger.addHandler(file_handler)
 
 DATA_PATH = "data"
@@ -83,6 +97,34 @@ class MainApp(MDApp):
         self.root.clear_widgets()
         self.root.add_widget(new_layout)
         self.current_layout = new_layout
+
+    def switch_layout_to_debug(self):
+        """
+        Switch the layout to the debug layout.
+        """
+        Logger.info("Switching UI: DebugUI")
+        new_layout = DebugUI(self.settings_handler)
+        self.root.clear_widgets()
+        self.root.add_widget(new_layout)
+        self.current_layout = new_layout
+
+    def switch_layout_to_logs(self):
+        """
+        Switch the layout to the logs layout.
+        """
+        Logger.info("Switching UI: LogsUI")
+        new_layout = LogsUI()
+        self.root.clear_widgets()
+        self.root.add_widget(new_layout)
+        self.current_layout = new_layout
+
+    def get_logs_text(self) -> str:
+        """
+        Return the logs text.
+        """
+        with open(log_file_path, 'r', encoding="utf-8") as log_file:
+            log_data = log_file.read()
+        return log_data
 
     def _scrape_models(self):
         """

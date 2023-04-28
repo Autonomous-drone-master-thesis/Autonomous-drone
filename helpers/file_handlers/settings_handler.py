@@ -18,6 +18,7 @@ class SettingsKeys(enum.Enum):
     PERSON_HEIGHT = "person_height"
     TRACKING_HEIGHT = "tracking_height"
     TRACKING_DISTANCE = "tracking_distance"
+    DEBUG_MODE = "debug_mode"
     SELECTED_OBJECT_DETECTION_MODEL = "selected_object_detection_model"
 
 
@@ -32,6 +33,7 @@ class SettingsHandler(BaseHandler):
             "person_height": None,
             "tracking_height": None,
             "tracking_distance": None,
+            "debug_mode": False,
             "selected_object_detection_model": None
         }
         super().__init__(data_directory, "settings.json")

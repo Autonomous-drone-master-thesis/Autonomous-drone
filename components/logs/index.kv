@@ -1,0 +1,17 @@
+#:kivy 2.1.0
+
+<LogsUI>:
+    BoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            title: "Logs"
+            anchor_title: "left"
+            left_action_items: [["arrow-left", lambda x: app.switch_layout_to_debug()]]
+        MDScrollView:
+            MDLabel:
+                text: app.get_logs_text()
+                font_style: "Body1"
+                size_hint_y: None
+                height: self.texture_size[1]
+                padding: dp(10), dp(10)
+                valign: "top"
