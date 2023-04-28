@@ -12,28 +12,19 @@ from .base_detector import BaseDetector
 class FaceDetector(BaseDetector):
     """Class for performing face detection using the Mediapipe library."""
 
-    def __init__(self, threshold: float = 0.5):
-        """
-        Initialize the FaceDetector object with the given threshold.
-        :param threshold: the minimum confidence score for a detected face to be considered valid
-        """
-        super().__init__(threshold)
-        self._load_model()
-
-    def predict(self, img: np.ndarray) -> Tuple[np.ndarray, Tuple[int, int], float]:
+    def predict(self, img: np.ndarray) -> Tuple[bool, np.ndarray, Tuple[int, int], float]:
         """
         Perform object detection on the input image and return the resulting
         :param img: the input image to perform object detection on
-        :return: the resulting image with the bounding boxes added,
+        :return: a boolean value indicating whether a face was detected,
+        the resulting image with the bounding boxes added,
         the center of the bounding box, and the area of the bounding box
         """
-        # Set the image to read-only mode to improve performance
-        img.flags.writeable = False
+        img.flags.writeable = False # Set the image to read-only mode to improve performance
 
         results = self._model_process(self._preprocess_image(img))
 
-        # Set the image back to writeable mode
-        img.flags.writeable = True
+        img.flags.writeable = True # Set the image back to writeable mode
 
         detected, img, center, area = self._visualize_bounding_box(img, results)
         return detected, img, center, area
@@ -64,6 +55,7 @@ class FaceDetector(BaseDetector):
         :return: the preprocessed image
         """
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = cv2.resize(img, (640, 480))
         return img
 
     def _visualize_bounding_box(
@@ -78,17 +70,17 @@ class FaceDetector(BaseDetector):
         """
         face_centers = []
         face_areas = []
-        face_found = False
+        detected = False
         if detections.detections:
-            face_found = True
+            detected = True
             for detection in detections.detections:
                 middle, area, x, y = self._get_box_coordinates(img, detection)
                 face_centers.append(middle)
                 face_areas.append(area)
                 self._draw_bounding_boxes(img, detection, x, y)
             closest_face_index = face_areas.index(max(face_areas))
-            return face_found, img, face_centers[closest_face_index], face_areas[closest_face_index]
-        return face_found, img, (0, 0), 0.0
+            return detected, img, face_centers[closest_face_index], face_areas[closest_face_index]
+        return detected, img, (0, 0), 0.0
 
     def _get_box_coordinates(
         self, img: np.ndarray, detection: mp.solutions.face_detection.FaceDetection
@@ -123,8 +115,7 @@ class FaceDetector(BaseDetector):
         :param x: the relative position of the bounding box on the x-axis
         :param y: the relative position of the bounding box on the y-axis
         """
-        # Draw the bounding box around the face
-        self.mp_drawing.draw_detection(img, detection)
+        self.mp_drawing.draw_detection(img, detection) # Draw the bounding box around the face
 
         # Draw a small circle at the middle of the bounding box
         cv2.circle(img, (int(x * img.shape[1]), int(y * img.shape[0])), 5, (0, 255, 0), -1)

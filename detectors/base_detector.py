@@ -18,15 +18,18 @@ class BaseDetector(ABC):
         :param threshold: the minimum confidence score for a detected object to be considered valid
         """
         self.threshold: float = threshold
-        self.logger = logging.getLogger(__name__)
         self.model = None
 
+        self.logger = logging.getLogger(__name__)
+        self._load_model()
+
     @abstractmethod
-    def predict(self, img: np.ndarray) -> Tuple[np.ndarray, Union[Tuple[int, int], None], Union[float, None]]:
+    def predict(self, img: np.ndarray) -> Tuple[bool, np.ndarray, Tuple[int, int], float]:
         """
         Perform object detection on the input image.
         :param img: the input image to perform object detection on
-        :return: the resulting image with the bounding boxes added,
+        :return: a boolean value indicating whether a target object was detected,
+        the resulting image with the bounding boxes added,
         the center of the bounding box, and the metric (area or height) of the bounding box
         """
 
@@ -75,19 +78,15 @@ class BaseDetector(ABC):
         while success:
             current_time = time.time()
 
-            # Calculate the FPS of the video
+
             fps = 1 / (current_time - start_time)
             start_time = current_time
 
-            detected, img, center, bbox_height = self.predict(img)
-            
-            print(detected)
+            detected, img, _, _ = self.predict(img)
 
-            # Add the FPS to the image and display it
             cv2.putText(img, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             cv2.imshow("Detector", img)
 
-            # Wait for the "q" key to be pressed
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
