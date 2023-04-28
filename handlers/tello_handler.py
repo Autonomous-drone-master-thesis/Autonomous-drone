@@ -19,7 +19,7 @@ class TelloHandler(Tello):
 
     def __init__(self) -> None:
         super().__init__()
-
+        self.connect()
         # Video recording attributes
         self.video = None
         self.recording = False
@@ -54,7 +54,6 @@ class TelloHandler(Tello):
 
     def connect_and_initiate(self) -> None:
         """Connects to the drone and initiates the drone to takeoff and hover at 25cm."""
-        self.connect()
         self.streamon()
         if self.record_video:
             self._start_recording()

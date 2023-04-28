@@ -46,8 +46,6 @@ class MainUI(FloatLayout):
         else:
             self._show_tracker_selection_dialog()
 
-        # Clock.schedule_interval(self._update_video_feed, 1 / 60)
-
     def _stop(self) -> None:
         """
         Private method that stops the drone and the video feed.
@@ -68,8 +66,10 @@ class MainUI(FloatLayout):
                     SettingsKeys.SELECTED_OBJECT_DETECTION_MODEL
                     )["downloaded_path"]
             self.drone.set_detector_and_tracker(tracker, model_path)
+            self._show_video_selection_dialog()
 
-        TrackerSelectionDialog(set_tracker).open()
+        tracker_dialog = TrackerSelectionDialog(set_tracker)
+        tracker_dialog.open()
 
     def _show_video_selection_dialog(self) -> None:
         """
@@ -81,9 +81,13 @@ class MainUI(FloatLayout):
                 self.drone.record_video = True
             else:
                 self.drone.record_video = False
+            self.drone.connect_and_initiate()
+            self._update_running_status()
+            self.drone.takeoff_and_hover()
             Clock.schedule_interval(self._update_video_feed, 1 / 60)
 
-        VideoSelectionDialog(set_video_record).open()
+        video_dialog = VideoSelectionDialog(set_video_record)
+        video_dialog.open()
 
     # dt argument is required by Clock.schedule_interval
     def _update_video_feed(self, dt):# pylint: disable=[C0103,W0613]
@@ -102,8 +106,7 @@ class MainUI(FloatLayout):
         self.detected = detected
 
     def _update_battery(self, dt: float) -> None:# pylint: disable=[C0103,W0613]
-        battery = self.drone.get_battery()
-        self.battery.text = f"Battery: {battery}%"
+        self.battery.text = f"Battery: {self.drone.get_battery()}%"
 
     def _update_temperature(self, dt: float) -> None:# pylint: disable=[C0103,W0613]
         self.temperature.text = f"Temperature: {self.drone.get_temperature()}"
