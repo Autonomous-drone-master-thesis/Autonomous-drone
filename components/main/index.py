@@ -1,8 +1,12 @@
 """This module contains the MainUI class, which is responsible for displaying the main UI."""
 
+import threading
+
 import cv2
+
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
+from kivy.factory import Factory
 from kivy.uix.floatlayout import FloatLayout
 
 # import backend
@@ -12,11 +16,14 @@ from handlers import TelloHandler
 from helpers import load_kv_file_for_class, SettingsHandler, SettingsKeys
 
 # import components
+from .connection_dialog import DroneConnectionDialog
+from .connection_error_dialog import DroneConnectionErrorDialog
 from .start_tracking_selection import StartTrackingSelectionDialog
 from .tracker_selection import TrackerSelectionDialog
 from .video_selection import VideoSelectionDialog
 
 load_kv_file_for_class("index.kv")
+
 
 
 # pylint: disable=E1101
@@ -28,14 +35,11 @@ class MainUI(FloatLayout):
 
         self.settings = settings
         self.running = False
-        self.drone = TelloHandler()
+        self.drone = None
         self.detector = None
         self.tracker = None
         self.detected = False
-
-        # Start listening to the drone
-        #Clock.schedule_interval(self._update_battery, 1)
-        #Clock.schedule_interval(self._update_temperature, 1)
+        self.pop_up = None
 
     def button_handler(self) -> None:
         """
@@ -44,7 +48,7 @@ class MainUI(FloatLayout):
         if self.running:
             self._stop()
         else:
-            self._show_tracker_selection_dialog()
+            self._connect_to_drone()
 
     def _stop(self) -> None:
         """
@@ -53,6 +57,35 @@ class MainUI(FloatLayout):
         self._update_running_status()
         Clock.unschedule(self._update_video_feed)
         self.drone.disconnect()
+
+    def _connect_to_drone(self) -> None:
+        """
+        Connects to the drone and shows the tracker selection dialog if the connection is successful
+        else shows the error dialog.
+        """
+        self.pop_up = Factory.DroneConnectionDialog()
+        self.pop_up.open()
+
+        my_thread = threading.Thread(target=self._init_drone)
+        my_thread.start()
+
+    def _init_drone(self):
+        """
+        Private method that initializes the drone. Needed as needs to be run in a separate thread.
+        """
+        try:
+            self.drone = TelloHandler()
+            Clock.schedule_once(lambda dt: self._modify_status("Connected."))
+
+            # Start listening to the drone
+            Clock.schedule_interval(self._update_battery, 1)
+            Clock.schedule_interval(self._update_temperature, 1)
+            Clock.schedule_once(self._show_tracker_selection_dialog)
+        except Exception:#pylint: disable=W0703
+            Clock.schedule_once(lambda dt: self._modify_status("Connection failed."))
+            Clock.schedule_once(lambda dt: DroneConnectionErrorDialog().open())
+        finally:
+            Clock.schedule_once(lambda dt: self.pop_up.dismiss())
 
     def _show_tracker_selection_dialog(self) -> None:
         """
