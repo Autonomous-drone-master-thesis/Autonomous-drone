@@ -47,7 +47,7 @@ class FaceTracker(BaseTracker):
         # not yet confirmed by user to track.
         if x != 0 and y != 0 and not track:
             self.drone.send_rc_control(0, 0, 0, 0)
-            return 0, 0, 0
+            return 0, 0
 
         previous_error_x, previous_error_y = previous_errors
 

@@ -76,14 +76,14 @@ class TelloHandler(Tello):
         img = self.get_frame_read().frame
         if isinstance(self.tracker, FaceTracker):
             detected, debug_img, center, area = self.detector.predict(img)
-            self.previous_error = self.tracker.track(area, center, self.previous_error, track)
+            self.previous_error = self.tracker.track(center, self.previous_error, area, track)
 
         elif isinstance(self.tracker, HumanTracker):
             detected, debug_img, center, bbox_height = self.detector.predict(img)
             self.previous_error = self.tracker.track(
-                bbox_height,
                 center,
                 self.previous_error,
+                bbox_height,
                 track
                 )
 
@@ -106,7 +106,7 @@ class TelloHandler(Tello):
     def _start_recording(self):
         """Starts recording the video feed from the drone."""
         height, width, _ = self.get_frame_read().frame.shape
-        file_name = f"videos/video_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.avi"
+        file_name = f"videos/video_{datetime.now().strftime('%d-%m-%Y_%H-%M-%S')}.avi"
         self.video = cv2.VideoWriter(
             file_name,
             cv2.VideoWriter_fourcc(*"XVID"),

@@ -1,5 +1,6 @@
 """This module contains the MainUI class, which is responsible for displaying the main UI."""
 
+import time
 import threading
 
 import cv2
@@ -85,7 +86,7 @@ class MainUI(FloatLayout):
             # Start listening to the drone
             Clock.schedule_interval(self._update_battery, 1)
             Clock.schedule_interval(self._update_temperature, 1)
-            Clock.schedule_once(self._show_tracker_selection_dialog)
+            Clock.schedule_once(lambda dt: self._show_tracker_selection_dialog())
         except Exception:#pylint: disable=W0703
             Clock.schedule_once(lambda dt: self._modify_status("Connection failed."))
             Clock.schedule_once(lambda dt: DroneConnectionErrorDialog().open())
@@ -119,6 +120,7 @@ class MainUI(FloatLayout):
                 self.drone.record_video = False
             self.drone.initiate_video_stream()
             self._update_running_status()
+            time.sleep(1)
             self.drone.takeoff_and_hover()
             Clock.schedule_interval(self._update_video_feed, 1 / 60)
 
@@ -128,9 +130,10 @@ class MainUI(FloatLayout):
     # dt argument is required by Clock.schedule_interval
     def _update_video_feed(self, dt):# pylint: disable=[C0103,W0613]
         detected, img = self.drone.detect_and_track(self.detected)
-
+        print(self.detected)
         if not self.detected and detected:
-            StartTrackingSelectionDialog(self._set_detected).open()
+            start_tracking_dialog = StartTrackingSelectionDialog(self._set_detected)
+            start_tracking_dialog.open()
 
         buf1 = cv2.flip(img, 0)
         buf = buf1.tostring()
