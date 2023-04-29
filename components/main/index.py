@@ -93,12 +93,10 @@ class MainUI(FloatLayout):
         """
 
         def set_tracker(tracker: str) -> None:
-            model_path = None
+            settings = None
             if tracker == 'human_tracker':
-                model_path = self.settings.get_value(
-                    SettingsKeys.SELECTED_OBJECT_DETECTION_MODEL
-                    )["downloaded_path"]
-            self.drone.set_detector_and_tracker(tracker, model_path)
+                settings = self.settings.read_data()
+            self.drone.set_detector_and_tracker(tracker, settings)
             self._show_video_selection_dialog()
 
         tracker_dialog = TrackerSelectionDialog(set_tracker)

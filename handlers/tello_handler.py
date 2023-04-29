@@ -20,6 +20,7 @@ class TelloHandler(Tello):
     def __init__(self) -> None:
         super().__init__()
         self.connect()
+
         # Video recording attributes
         self.video = None
         self.recording = False
@@ -34,26 +35,35 @@ class TelloHandler(Tello):
         if not os.path.exists(VIDEOS_PATH):
             os.mkdir(VIDEOS_PATH)
 
-    def set_detector_and_tracker(self, tracker: str, model_path: Optional[str]) -> None:
+    def set_detector_and_tracker(self, tracker: str, settings: Optional[dict]) -> None:
         """Sets the detector and tracker to use.
         :param tracker: The tracker to use.
-        :param model_path: The path to the model to use. Only used if the tracker is 
-        human_tracker."""
+        :param settings: A dictionary containing the settings for the application.
+        """
         if tracker == "face_tracker":
             self.detector = FaceDetector()
             self.tracker = FaceTracker(self)
             self.previous_error = (0, 0)
         elif tracker == "human_tracker":
-            if model_path is None:
-                raise ValueError("A model path must be provided when using the human tracker.")
-            self.detector = HumanDetector(model_path)
-            self.tracker = HumanTracker(self)
+            if settings is None:
+                raise ValueError(
+                    "A settings dictionary must be provided when using the human tracker."
+                    )
+            selected_model_information = settings["selected_object_detection_model"]
+            model_path = selected_model_information["downloaded_path"]
+            model_width, model_height = map(int, selected_model_information["size"].split("x"))
+            self.detector = HumanDetector(model_path, model_height, model_width)
+
+            target_distance = settings["tracking_distance"]
+            target_height = settings["tracking_height"]
+            tracking_human_height = settings["person_height"]
+            self.tracker = HumanTracker(self, target_distance, target_height, tracking_human_height)
             self.previous_error = (0, 0, 0)
         else:
             raise NotImplementedError("Tracker not implemented yet.")
 
-    def connect_and_initiate(self) -> None:
-        """Connects to the drone and initiates the drone to takeoff and hover at 25cm."""
+    def initiate_video_stream(self) -> None:
+        """Initiates the video stream and video recording if enabled."""
         self.streamon()
         if self.record_video:
             self._start_recording()
@@ -65,20 +75,23 @@ class TelloHandler(Tello):
         img = self.get_frame_read().frame
         if isinstance(self.tracker, FaceTracker):
             detected, debug_img, center, area = self.detector.predict(img)
-            if track:
-                self.previous_error = self.tracker.track(area, center, self.previous_error)
+            self.previous_error = self.tracker.track(area, center, self.previous_error, track)
 
         elif isinstance(self.tracker, HumanTracker):
             detected, debug_img, center, bbox_height = self.detector.predict(img)
-            if track:
-                self.previous_error = self.tracker.track(bbox_height, center, self.previous_error)
+            self.previous_error = self.tracker.track(
+                bbox_height,
+                center,
+                self.previous_error,
+                track
+                )
 
         else:
             raise NotImplementedError("Tracker not implemented yet.")
         return detected, debug_img if debug else img
 
     def takeoff_and_hover(self) -> None:
-        """Takes off and hovers at 35cm."""
+        """Takes off and hover"""
         self.takeoff()
         self.send_rc_control(0, 0, 35, 0)
 
