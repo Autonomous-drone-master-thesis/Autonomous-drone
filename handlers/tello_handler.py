@@ -1,4 +1,5 @@
 """Module for the TelloHandler class."""
+from datetime import datetime
 import os
 import time
 from threading import Thread
@@ -105,8 +106,9 @@ class TelloHandler(Tello):
     def _start_recording(self):
         """Starts recording the video feed from the drone."""
         height, width, _ = self.get_frame_read().frame.shape
+        file_name = f"videos/video_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.avi"
         self.video = cv2.VideoWriter(
-            "videos/video.avi",
+            file_name,
             cv2.VideoWriter_fourcc(*"XVID"),
             30,
             (width, height)
