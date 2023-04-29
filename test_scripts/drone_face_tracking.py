@@ -8,7 +8,7 @@ from trackers import FaceTracker
 def main():
 
     drone = TelloHandler()
-    drone.connect_and_initiate()
+    drone.initiate_video_stream()
 
     detector = FaceDetector()
 
@@ -22,8 +22,13 @@ def main():
         while True:
             frame = drone.get_frame_read().frame
 
-            img, middle, area = detector.predict(frame)
-            previous_error_x, previous_error_y = tracker.track(area, middle, (previous_error_x, previous_error_y))
+            _, img, middle, area = detector.predict(frame)
+            previous_error_x, previous_error_y = tracker.track(
+                middle,
+                (previous_error_x, previous_error_y),
+                area,
+                True
+                )
 
             cv2.imshow("Image", img)
             if cv2.waitKey(1) and 0xFF == ord("q"):

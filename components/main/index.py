@@ -42,6 +42,8 @@ class MainUI(FloatLayout):
         self.detected = False
         self.pop_up = None
 
+        self.start_tracking_dialog_opened = False
+
     def button_handler(self) -> None:
         """
         Handles the main button press event.
@@ -120,7 +122,7 @@ class MainUI(FloatLayout):
                 self.drone.record_video = False
             self.drone.initiate_video_stream()
             self._update_running_status()
-            time.sleep(1)
+            time.sleep(2)
             self.drone.takeoff_and_hover()
             Clock.schedule_interval(self._update_video_feed, 1 / 60)
 
@@ -130,8 +132,9 @@ class MainUI(FloatLayout):
     # dt argument is required by Clock.schedule_interval
     def _update_video_feed(self, dt):# pylint: disable=[C0103,W0613]
         detected, img = self.drone.detect_and_track(self.detected)
-        print(self.detected)
-        if not self.detected and detected:
+
+        if not self.detected and detected and not self.start_tracking_dialog_opened:
+            self.start_tracking_dialog_opened = True
             start_tracking_dialog = StartTrackingSelectionDialog(self._set_detected)
             start_tracking_dialog.open()
 
@@ -143,6 +146,7 @@ class MainUI(FloatLayout):
 
     def _set_detected(self, detected: bool) -> None:
         self.detected = detected
+        self.start_tracking_dialog_opened = False
 
     def _update_battery(self, dt: float) -> None:# pylint: disable=[C0103,W0613]
         self.battery.text = f"Battery: {self.drone.get_battery()}%"
