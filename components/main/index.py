@@ -43,6 +43,7 @@ class MainUI(FloatLayout):
 
         self.start_tracking_dialog = StartTrackingSelectionDialog(self._set_detected)
         self.start_tracking_dialog_opened = False
+        self.prev_detected = False
 
     def button_handler(self) -> None:
         """
@@ -136,12 +137,14 @@ class MainUI(FloatLayout):
     def _update_video_feed(self, dt):# pylint: disable=[C0103,W0613]
         detected, img = self.drone.detect_and_track(self.detected)
 
-        if not self.detected and detected and not self.start_tracking_dialog_opened:
+        if not self.detected and detected and not self.start_tracking_dialog_opened and not self.prev_detected:
             self.start_tracking_dialog_opened = True
             self.start_tracking_dialog.open()
-        elif not self.detected and detected and self.start_tracking_dialog_opened:
+        elif not self.detected and detected and self.start_tracking_dialog_opened and self.prev_detected:
             self.start_tracking_dialog.dismiss()
             self.start_tracking_dialog_opened = False
+        
+        self.prev_detected = detected
 
         buf1 = cv2.flip(img, 0)
         buf = buf1.tostring()
