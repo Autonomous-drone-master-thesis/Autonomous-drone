@@ -18,11 +18,14 @@ class StartTrackingSelectionDialog(MDDialog):
             type="custom",
             buttons=[
                 MDFlatButton(
-                    text="No", on_release=lambda x: (callback(False), self.dismiss())
+                    text="No", on_release=lambda x: (callback(False))
                 ),
                 MDFlatButton(
-                    text="Yes", on_release=lambda x: (callback(True), self.dismiss())
+                    text="Yes", on_release=lambda x: (callback(True))
                 )
             ],
             **kwargs
         )
+    
+    def dismiss(self):
+        super().dismiss()

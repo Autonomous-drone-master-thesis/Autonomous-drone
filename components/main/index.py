@@ -1,6 +1,5 @@
 """This module contains the MainUI class, which is responsible for displaying the main UI."""
 
-import time
 import threading
 
 import cv2
@@ -42,6 +41,7 @@ class MainUI(FloatLayout):
         self.detected = False
         self.pop_up = None
 
+        self.start_tracking_dialog = StartTrackingSelectionDialog(self._set_detected)
         self.start_tracking_dialog_opened = False
 
     def button_handler(self) -> None:
@@ -59,12 +59,16 @@ class MainUI(FloatLayout):
         """
         self._update_running_status()
         Clock.unschedule(self._update_video_feed)
+        Clock.unschedule(self._update_battery)
+        Clock.unschedule(self._update_temperature)
         self.drone.disconnect()
         self.running = False
         self.drone = None
         self.detector = None
         self.tracker = None
         self.detected = False
+
+        self.start_tracking_dialog_opened = False
 
     def _connect_to_drone(self) -> None:
         """
@@ -122,7 +126,6 @@ class MainUI(FloatLayout):
                 self.drone.record_video = False
             self.drone.initiate_video_stream()
             self._update_running_status()
-            time.sleep(2)
             self.drone.takeoff_and_hover()
             Clock.schedule_interval(self._update_video_feed, 1 / 60)
 
@@ -135,8 +138,10 @@ class MainUI(FloatLayout):
 
         if not self.detected and detected and not self.start_tracking_dialog_opened:
             self.start_tracking_dialog_opened = True
-            start_tracking_dialog = StartTrackingSelectionDialog(self._set_detected)
-            start_tracking_dialog.open()
+            self.start_tracking_dialog.open()
+        elif not self.detected and detected and self.start_tracking_dialog_opened:
+            self.start_tracking_dialog.dismiss()
+            self.start_tracking_dialog_opened = False
 
         buf1 = cv2.flip(img, 0)
         buf = buf1.tostring()
@@ -145,7 +150,9 @@ class MainUI(FloatLayout):
         self.video.texture = texture
 
     def _set_detected(self, detected: bool) -> None:
+        print(detected)
         self.detected = detected
+        self.start_tracking_dialog.dismiss()
         self.start_tracking_dialog_opened = False
 
     def _update_battery(self, dt: float) -> None:# pylint: disable=[C0103,W0613]

@@ -69,17 +69,17 @@ class TelloHandler(Tello):
         if self.record_video:
             self._start_recording()
 
-    def detect_and_track(self, track: bool, debug: bool=False) -> Tuple[bool, np.ndarray]:
+    def detect_and_track(self, track: bool) -> Tuple[bool, np.ndarray]:
         """Detects and tracks the object.
         :param track: Whether to track the object or not.
-        :param debug: Whether to return the debug image or not."""
+        """
         img = self.get_frame_read().frame
         if isinstance(self.tracker, FaceTracker):
-            detected, debug_img, center, area = self.detector.predict(img)
+            detected, img, center, area = self.detector.predict(img)
             self.previous_error = self.tracker.track(center, self.previous_error, area, track)
 
         elif isinstance(self.tracker, HumanTracker):
-            detected, debug_img, center, bbox_height = self.detector.predict(img)
+            detected, img, center, bbox_height = self.detector.predict(img)
             self.previous_error = self.tracker.track(
                 center,
                 self.previous_error,
@@ -89,17 +89,19 @@ class TelloHandler(Tello):
 
         else:
             raise NotImplementedError("Tracker not implemented yet.")
-        return detected, debug_img if debug else img
+        return detected, img
 
     def takeoff_and_hover(self) -> None:
         """Takes off and hover"""
         self.takeoff()
         self.send_rc_control(0, 0, 35, 0)
+        time.sleep(1)
 
     def disconnect(self) -> None:
         """Disconnects from the drone and lands it."""
         self.send_rc_control(0, 0, 0, 0)
-        self._stop_recording()
+        if self.record_video:
+            self._stop_recording()
         self.streamoff()
         self.land()
 
