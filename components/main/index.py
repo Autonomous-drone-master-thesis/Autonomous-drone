@@ -1,5 +1,6 @@
 """This module contains the MainUI class, which is responsible for displaying the main UI."""
 
+from collections import deque
 import threading
 
 import cv2
@@ -43,7 +44,7 @@ class MainUI(FloatLayout):
 
         self.start_tracking_dialog = StartTrackingSelectionDialog(self._set_detected)
         self.start_tracking_dialog_opened = False
-        self.prev_detected = False
+        self.detection_history = deque(maxlen=60)
 
     def button_handler(self) -> None:
         """
@@ -128,7 +129,7 @@ class MainUI(FloatLayout):
             self.drone.initiate_video_stream()
             self._update_running_status()
             self.drone.takeoff_and_hover()
-            Clock.schedule_interval(self._update_video_feed, 1 / 60)
+            Clock.schedule_interval(self._update_video_feed, 1 / 30)
 
         video_dialog = VideoSelectionDialog(set_video_record)
         video_dialog.open()
@@ -137,14 +138,16 @@ class MainUI(FloatLayout):
     def _update_video_feed(self, dt):# pylint: disable=[C0103,W0613]
         detected, img = self.drone.detect_and_track(self.detected)
 
-        if not self.detected and detected and not self.start_tracking_dialog_opened and not self.prev_detected:
+        self.detection_history.append(detected)
+
+        at_least_once_detected = True in self.detection_history
+
+        if not self.detected and at_least_once_detected and not self.start_tracking_dialog_opened:
             self.start_tracking_dialog_opened = True
             self.start_tracking_dialog.open()
-        elif not self.detected and detected and self.start_tracking_dialog_opened and self.prev_detected:
+        elif not self.detected and not at_least_once_detected and self.start_tracking_dialog_opened:
             self.start_tracking_dialog.dismiss()
             self.start_tracking_dialog_opened = False
-        
-        self.prev_detected = detected
 
         buf1 = cv2.flip(img, 0)
         buf = buf1.tostring()
