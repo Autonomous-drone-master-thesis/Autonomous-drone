@@ -13,7 +13,7 @@ from kivy.uix.floatlayout import FloatLayout
 from handlers import TelloHandler
 
 # import utilities
-from helpers import load_kv_file_for_class, SettingsHandler, SettingsKeys
+from helpers import load_kv_file_for_class, SettingsHandler
 
 # import components
 from .connection_dialog import DroneConnectionDialog
@@ -57,6 +57,11 @@ class MainUI(FloatLayout):
         self._update_running_status()
         Clock.unschedule(self._update_video_feed)
         self.drone.disconnect()
+        self.running = False
+        self.drone = None
+        self.detector = None
+        self.tracker = None
+        self.detected = False
 
     def _connect_to_drone(self) -> None:
         """
@@ -112,7 +117,7 @@ class MainUI(FloatLayout):
                 self.drone.record_video = True
             else:
                 self.drone.record_video = False
-            self.drone.connect_and_initiate()
+            self.drone.initiate_video_stream()
             self._update_running_status()
             self.drone.takeoff_and_hover()
             Clock.schedule_interval(self._update_video_feed, 1 / 60)

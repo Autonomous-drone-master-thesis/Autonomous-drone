@@ -14,10 +14,6 @@ from tensorflow.python.keras.utils.data_utils import get_file
 
 from .file_handlers import ModelsHandler
 
-#TODO: Remove this
-os.environ['http_proxy'] = 'http://10.246.170.130:3128'
-os.environ['https_proxy'] = 'https://10.246.170.130:3128'
-
 
 class ModelDownloader:
     """
