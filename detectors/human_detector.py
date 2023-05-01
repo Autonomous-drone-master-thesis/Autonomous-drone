@@ -91,7 +91,9 @@ class HumanDetector(BaseDetector):
         input_tensor = input_tensor[tf.newaxis, ...]
         return input_tensor
 
-    def _visualize_bounding_box(self, img: np.ndarray, detections: Dict[str, tf.Tensor]) -> np.ndarray:
+    def _visualize_bounding_box(
+        self, img: np.ndarray, detections: Dict[str, tf.Tensor]
+        ) -> np.ndarray:
         """
         Visualize the bounding boxes around the detected objects.
         :param img: the input image with the detected objects
@@ -105,7 +107,11 @@ class HumanDetector(BaseDetector):
         person_index = self.classes_list.index("person")
         human_boxes = False
         if tf.size(bbox_idx) > 0:
-            human_boxes = [(box, class_scores[box]) for box in bbox_idx if class_indexes[box] == person_index]
+            human_boxes = [
+                (box, class_scores[box])
+                for box in bbox_idx
+                if class_indexes[box] == person_index
+                ]
 
         human_found = bool(human_boxes)
 
@@ -115,7 +121,9 @@ class HumanDetector(BaseDetector):
 
         return human_found, img, center, bbox_height
 
-    def _get_bounding_boxes(self, detections: dict) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    def _get_bounding_boxes(
+        self, detections: dict
+        ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
         Extract the bounding boxes, class indexes,
         and class scores from the object detection results.
@@ -155,7 +163,8 @@ class HumanDetector(BaseDetector):
         :param bboxs: the bounding boxes themselves
         :param height: the height of the input image
         :param width: the width of the input image
-        :return: the image with the bounding boxes and class names added
+        :return: the image with the bounding boxes and class names added,
+            center of the bounding box, and the height of the bounding box
         """
         center = (0, 0)
         bbox_height = 0

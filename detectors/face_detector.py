@@ -65,8 +65,9 @@ class FaceDetector(BaseDetector):
         Visualize the bounding boxes around the detected faces.
         :param img: the input image with the detected faces
         :param results: the face detection results
-        :return: the resulting image with the bounding boxes added,
-        TODO: Docstring
+        :return: a boolean value indicating whether a face was detected,
+        the resulting image with the bounding boxes added,
+        the center of the bounding box, and the area of the bounding box
         """
         face_centers = []
         face_areas = []

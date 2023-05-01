@@ -2,14 +2,11 @@
 
 from dataclasses import dataclass
 import math
-from typing import Tuple, TYPE_CHECKING
+from typing import Tuple
 
 import numpy as np
 
 from .base_tracker import BaseTracker
-
-if TYPE_CHECKING:
-    from handlers import TelloHandler
 
 
 @dataclass
@@ -29,14 +26,12 @@ class HumanTracker(BaseTracker):
     """Class for tracking humans."""
 
     def __init__(
-        self,drone: "TelloHandler", target_distance: int, target_height: int, tracking_human_height: int
+        self, target_distance: int, target_height: int, tracking_human_height: int
         ) -> None:
-        super().__init__(drone)
+        super().__init__()
         self.target_distance = target_distance # in cm
         self.target_height = target_height # in cm
         self.tracking_human_height = tracking_human_height # in cm
-        self.image_width = 1280
-        self.image_height = 720
         self.pid_gains = {"p": [0.15, 0.3, 0.1], "i": [0.1, 0.3, 0.01], "d": [0.2, 0.3, 0.1]}
         self.vertical_field_of_view = self._get_field_of_view() # in radians
 
@@ -47,18 +42,26 @@ class HumanTracker(BaseTracker):
         previous_errors: Tuple[int, int, int],
         bbox_height: int,
         track: bool,
-    ) -> Tuple[int, int]:
-        x, y = center
+    ) -> Tuple[Tuple[int, int, int], Tuple[int, int, int, int]]:
+        """
+        Method for tracking faces.
+        :param center: center of the face
+        :param previous_errors: previous errors
+        :param bbox_height: height of the bounding box
+        :param track: whether to track or not
+        :return: previous errors and commands to be sent to the drone
+        """
+        center_x, center_y = center
+        commands = (0, 0, 0, 0)
 
         # Safety mechanism to prevent drone from moving when human detected but
         # not yet confirmed by user to track.
-        if x != 0 and y != 0 and not track:
-            self.drone.send_rc_control(0, 0, 0, 0)
-            return 0, 0, 0
+        if center_x != 0 and center_y != 0 and not track:
+            return (0, 0, 0), commands
 
         previous_error_x, previous_error_y, previous_error_z = previous_errors
 
-        current_error_x = x - self.image_width // 2
+        current_error_x = center_x - self.image_width // 2
 
         yaw_velocity = self._calculate_yaw_velocity(current_error_x, previous_error_x)
 
@@ -71,9 +74,9 @@ class HumanTracker(BaseTracker):
             yaw_velocity=yaw_velocity,
         )
 
-        if x != 0 and y != 0:
+        if center_x != 0 and center_y != 0:
             distance = self._calculate_distance(bbox_height)
-            height = self._calculate_drone_height(y, distance)
+            height = self._calculate_drone_height(center_y, distance)
 
             values.current_error_y = -(height - self.target_height)
             values.current_error_z = distance - self.target_distance
@@ -87,16 +90,22 @@ class HumanTracker(BaseTracker):
                 values.current_error_z, previous_error_z
             )
 
-        self.drone.send_rc_control(
+        commands = (
             0,
             values.forward_backward_velocity,
             values.up_down_velocity,
             values.yaw_velocity
             )
 
-        return values.current_error_x, values.current_error_y, values.current_error_z
+        return (values.current_error_x, values.current_error_y, values.current_error_z), commands
 
     def _calculate_yaw_velocity(self, current_error_x: int, previous_error_x: int) -> int:
+        """
+        Method for calculating the yaw velocity.
+        :param current_error_x: The current error in the x direction.
+        :param previous_error_x: The previous error in the x direction.
+        :return: The yaw velocity.
+        """
         yaw_velocity = (
             self.pid_gains["p"][0] * current_error_x +
             self.pid_gains["d"][0] * (current_error_x - previous_error_x)
@@ -105,6 +114,12 @@ class HumanTracker(BaseTracker):
         return yaw_velocity
 
     def _calculate_up_down_velocity(self, current_error_y: int, previous_error_y: int) -> int:
+        """
+        Method for calculating the up/down velocity.
+        :param current_error_y: The current error in the y direction.
+        :param previous_error_y: The previous error in the y direction.
+        :return: The up/down velocity.
+        """
         up_down_velocity = self.pid_gains["p"][2] * current_error_y + self.pid_gains["d"][2] * (
             current_error_y - previous_error_y
         )
@@ -112,10 +127,14 @@ class HumanTracker(BaseTracker):
         return up_down_velocity
 
     def _calculate_forward_backward_velocity(
-        self,
-        current_error_z: int,
-        previous_error_z: int
+        self, current_error_z: int, previous_error_z: int
         ) -> int:
+        """
+        Method for calculating the forward/backward velocity.
+        :param current_error_z: The current error in the z direction.
+        :param previous_error_z: The previous error in the z direction.
+        :return: The forward/backward velocity.
+        """
         forward_backward_velocity = (
             self.pid_gains["p"][1] * current_error_z +
             self.pid_gains["d"][1] * (current_error_z - previous_error_z)
@@ -124,17 +143,32 @@ class HumanTracker(BaseTracker):
         return forward_backward_velocity
 
     def _get_field_of_view(self) -> float:
+        """
+        Method for calculating the vertical field of view.
+        :return: The vertical field of view.
+        """
         sensor_height = 3.6
         focal_length = 3.61
         return 2 * math.atan((sensor_height / 2) / focal_length)
 
-    def _calculate_distance(self, bbox_height):
+    def _calculate_distance(self, bbox_height) -> float:
+        """
+        Method for calculating the distance to the human.
+        :param bbox_height: The height of the bounding box.
+        :return: The distance to the human.
+        """
         distance = (self.tracking_human_height * self.image_height) / (
             2 * bbox_height * math.tan(self.vertical_field_of_view / 2)
         )
         return distance
 
-    def _calculate_drone_height(self, center_y, distance):
+    def _calculate_drone_height(self, center_y, distance) -> float:
+        """
+        Method for calculating the drone height.
+        :param center_y: The y coordinate of the center of the bounding box.
+        :param distance: The distance to the human.
+        :return: The drone height.
+        """
         angle_to_bbox_bottom = (
             (self.image_height / 2 - center_y) *
             (self.vertical_field_of_view / self.image_height)

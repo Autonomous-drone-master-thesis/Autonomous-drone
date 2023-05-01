@@ -31,7 +31,7 @@ class TelloHandler(Tello):
         # Backend attributes
         self.detector = None
         self.tracker = None
-        self.previous_error = None
+        self.previous_errors = None
 
         if not os.path.exists(VIDEOS_PATH):
             os.mkdir(VIDEOS_PATH)
@@ -43,8 +43,8 @@ class TelloHandler(Tello):
         """
         if tracker == "face_tracker":
             self.detector = FaceDetector()
-            self.tracker = FaceTracker(self)
-            self.previous_error = (0, 0)
+            self.tracker = FaceTracker()
+            self.previous_errors = (0, 0)
         elif tracker == "human_tracker":
             if settings is None:
                 raise ValueError(
@@ -58,8 +58,8 @@ class TelloHandler(Tello):
             target_distance = settings["tracking_distance"]
             target_height = settings["tracking_height"]
             tracking_human_height = settings["person_height"]
-            self.tracker = HumanTracker(self, target_distance, target_height, tracking_human_height)
-            self.previous_error = (0, 0, 0)
+            self.tracker = HumanTracker(target_distance, target_height, tracking_human_height)
+            self.previous_errors = (0, 0, 0)
         else:
             raise NotImplementedError("Tracker not implemented yet.")
 
@@ -74,21 +74,11 @@ class TelloHandler(Tello):
         :param track: Whether to track the object or not.
         """
         img = self.get_frame_read().frame
-        if isinstance(self.tracker, FaceTracker):
-            detected, img, center, area = self.detector.predict(img)
-            self.previous_error = self.tracker.track(center, self.previous_error, area, track)
-
-        elif isinstance(self.tracker, HumanTracker):
-            detected, img, center, bbox_height = self.detector.predict(img)
-            self.previous_error = self.tracker.track(
-                center,
-                self.previous_error,
-                bbox_height,
-                track
-                )
-
-        else:
-            raise NotImplementedError("Tracker not implemented yet.")
+        detected, img, center, metric = self.detector.predict(img)
+        self.previous_errors, commands = self.tracker.track(
+            center, self.previous_errors, metric, track
+            )
+        self.send_rc_control(*commands)
         return detected, img
 
     def takeoff_and_hover(self) -> None:

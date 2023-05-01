@@ -35,7 +35,7 @@ class ParametersUI(BoxLayout):
         :param height: The person's height.
         """
         Logger.info("Parameters Component: Saving height: %s", height)
-        self.main_app.settings_handler.set_value(SettingsKeys.PERSON_HEIGHT, height)
+        self.main_app.settings_handler.set_value(SettingsKeys.PERSON_HEIGHT, int(height))
 
     def show_tracking_input(self) -> None:
         """Show the tracking input dialog for entering the tracking height and distance."""
@@ -55,8 +55,8 @@ class ParametersUI(BoxLayout):
             height,
             distance
             )
-        self.main_app.settings_handler.set_value(SettingsKeys.TRACKING_HEIGHT, height)
-        self.main_app.settings_handler.set_value(SettingsKeys.TRACKING_DISTANCE, distance)
+        self.main_app.settings_handler.set_value(SettingsKeys.TRACKING_HEIGHT, int(height))
+        self.main_app.settings_handler.set_value(SettingsKeys.TRACKING_DISTANCE, int(distance))
 
     def show_model_selection_select(self) -> None:
         """Show the model selection dialog for choosing a human tracker model."""

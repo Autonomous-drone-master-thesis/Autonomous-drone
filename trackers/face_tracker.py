@@ -7,9 +7,6 @@ import numpy as np
 
 from .base_tracker import BaseTracker
 
-if TYPE_CHECKING:
-    from handlers import TelloHandler
-
 
 @dataclass
 class TrackerValues:
@@ -27,9 +24,8 @@ class TrackerValues:
 class FaceTracker(BaseTracker):
     """Class for tracking faces."""
 
-    def __init__(self, drone: "TelloHandler") -> None:
-        super().__init__(drone)
-        self.width, self.height = 1280, 720
+    def __init__(self) -> None:
+        super().__init__()
         self.area_range = [0.01, 0.02]
         self.pid = [0.15, 0.15, 0]
 
@@ -40,18 +36,26 @@ class FaceTracker(BaseTracker):
         previous_errors: Tuple[int, int],
         area: float,
         track: bool,
-    ) -> Tuple[int, int]:
-        x, y = center
+    ) -> Tuple[Tuple[int, int], Tuple[int, int, int, int]]:
+        """
+        Method for tracking faces.
+        :param center: center of the face
+        :param previous_errors: previous errors
+        :param area: area of the face
+        :param track: whether to track or not
+        :return: previous errors and commands to be sent to the drone
+        """
+        center_x, center_y = center
+        commands = (0, 0, 0, 0)
 
         # Safety mechanism to prevent drone from moving when face detected but
         # not yet confirmed by user to track.
-        if x != 0 and y != 0 and not track:
-            self.drone.send_rc_control(0, 0, 0, 0)
-            return 0, 0
+        if center_x != 0 and center_y != 0 and not track:
+            return (0, 0), commands
 
         previous_error_x, previous_error_y = previous_errors
 
-        current_error_x = x - self.width // 2
+        current_error_x = center_x - self.image_width // 2
 
         yaw_velocity = self._calculate_yaw_velocity(current_error_x, previous_error_x)
 
@@ -64,8 +68,8 @@ class FaceTracker(BaseTracker):
             yaw_velocity=yaw_velocity,
         )
 
-        if x != 0 and y != 0:
-            values.current_error_y = y - self.height // 2
+        if center_x != 0 and center_y != 0:
+            values.current_error_y = center_y - self.image_height // 2
             values.up_down_velocity = self._calculate_up_down_velocity(
                 values.current_error_y,
                 previous_error_y
@@ -73,16 +77,22 @@ class FaceTracker(BaseTracker):
 
             values.forward_backward_velocity = self._calculate_forward_backward_velocity(area)
 
-        self.drone.send_rc_control(
+        commands = (
             0,
             values.forward_backward_velocity,
             values.up_down_velocity,
             values.yaw_velocity
             )
 
-        return values.current_error_x, values.current_error_y
+        return (values.current_error_x, values.current_error_y), commands
 
     def _calculate_yaw_velocity(self, current_error_x: int, previous_error_x: int) -> int:
+        """
+        Method for calculating the yaw velocity.
+        :param current_error_x: The current error in the x direction.
+        :param previous_error_x: The previous error in the x direction.
+        :return: The yaw velocity.
+        """
         yaw_velocity = (
             self.pid[0] * current_error_x +
             self.pid[1] * (current_error_x - previous_error_x)
@@ -91,6 +101,12 @@ class FaceTracker(BaseTracker):
         return yaw_velocity
 
     def _calculate_up_down_velocity(self, current_error_y: int, previous_error_y: int) -> int:
+        """
+        Method for calculating the up/down velocity.
+        :param current_error_y: The current error in the y direction.
+        :param previous_error_y: The previous error in the y direction.
+        :return: The up/down velocity.
+        """
         up_down_velocity = -(
             self.pid[0] * current_error_y +
             self.pid[1] * (current_error_y - previous_error_y)
@@ -99,6 +115,11 @@ class FaceTracker(BaseTracker):
         return up_down_velocity
 
     def _calculate_forward_backward_velocity(self, area: float) -> int:
+        """
+        Method for calculating the forward/backward velocity.
+        :param area: The area of the face.
+        :return: The forward/backward velocity.
+        """
         if area > self.area_range[1]:
             forward_backward_velocity = -25
         elif area < self.area_range[0] and area != 0:

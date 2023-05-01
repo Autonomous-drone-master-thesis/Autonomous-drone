@@ -1,19 +1,17 @@
 """Module containing the BaseTracker class."""
 
 from abc import ABC, abstractmethod
-from typing import Tuple, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from handlers import TelloHandler
+from typing import Tuple
 
 
 class BaseTracker(ABC):
     """Abstract base class for tracking objects."""
-    def __init__(self, drone: "TelloHandler") -> None:
-        self.drone = drone
+    def __init__(self) -> None:
+        self.image_width = 1280
+        self.image_height = 720
 
     @abstractmethod
-    def track(self, center, previous_errors, *args) -> Tuple:
+    def track(self, center, previous_errors, *args) -> Tuple[Tuple, Tuple[int, int, int, int]]:
         """
         Abstract method for tracking objects.
         """

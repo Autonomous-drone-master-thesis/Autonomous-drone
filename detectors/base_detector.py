@@ -82,9 +82,12 @@ class BaseDetector(ABC):
             fps = 1 / (current_time - start_time)
             start_time = current_time
 
-            detected, img, _, _ = self.predict(img)
+            _, img, _, _ = self.predict(img)
 
-            cv2.putText(img, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(
+                img, f"FPS: {fps:.2f}", (10, 30), 
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2
+                )
             cv2.imshow("Detector", img)
 
             if cv2.waitKey(1) & 0xFF == ord("q"):
@@ -95,15 +98,15 @@ class BaseDetector(ABC):
         # Close all OpenCV windows
         cv2.destroyAllWindows()
 
-    def _initiate_video_writer(self, video: Union[int, str]) -> cv2.VideoCapture:
+    def _initiate_video_writer(self, video_path: Union[int, str]) -> cv2.VideoCapture:
         """
         Open a video file or camera stream using the OpenCV library
         and return the VideoCapture instance.
-        :param video: the path to the video file or the index of the camera device
+        :param video_path: the path to the video file or the index of the camera device
         :return: the VideoCapture instance
         """
         self.logger.info("Initiating a video")
-        cap = cv2.VideoCapture(video)
+        cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             self.logger.error("Cannot open camera")
             raise ValueError("Cannot open camera")

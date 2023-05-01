@@ -1,5 +1,4 @@
 from djitellopy import Tello
-from djitellopy import TelloException
 
 def main() -> None:
     tello = Tello()
@@ -10,7 +9,7 @@ def main() -> None:
         for _ in range(4):
             tello.move_forward(20)
             tello.rotate_clockwise(90)
-    except TelloException as e:
+    except Exception as e:
         print(e)
     finally:
         tello.land()
