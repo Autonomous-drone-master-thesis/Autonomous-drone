@@ -3,7 +3,6 @@ displaying the models download UI."""
 
 from typing import Callable
 
-# pylint: disable=E0611
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.selectioncontrol import MDCheckbox

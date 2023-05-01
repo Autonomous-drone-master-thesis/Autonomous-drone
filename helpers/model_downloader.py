@@ -9,7 +9,7 @@ from typing import Callable, Optional
 
 import aiohttp
 from kivy.logger import Logger
-# pylint: disable=E0611
+
 from tensorflow.python.keras.utils.data_utils import get_file
 
 from .file_handlers import ModelsHandler
