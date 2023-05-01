@@ -1,9 +1,21 @@
 """Module containing the BaseTracker class."""
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Tuple
 
+@dataclass
+class TrackerValues:
+    """Dataclass for storing values used in tracking."""
 
+    current_error_x: int
+    current_error_y: int
+    current_error_z: int
+    forward_backward_velocity: int
+    up_down_velocity: int
+    yaw_velocity: int
+
+# pylint: disable=R0903
 class BaseTracker(ABC):
     """Abstract base class for tracking objects."""
     def __init__(self) -> None:

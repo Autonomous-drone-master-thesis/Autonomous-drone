@@ -1,24 +1,11 @@
 """Module for the HumanTracker class."""
 
-from dataclasses import dataclass
 import math
 from typing import Tuple
 
 import numpy as np
 
-from .base_tracker import BaseTracker
-
-
-@dataclass
-class TrackerValues:
-    """Dataclass for storing values used in tracking."""
-
-    current_error_x: int
-    current_error_y: int
-    current_error_z: int
-    forward_backward_velocity: int
-    up_down_velocity: int
-    yaw_velocity: int
+from .base_tracker import BaseTracker, TrackerValues
 
 
 # pylint: disable=R0903
@@ -35,7 +22,7 @@ class HumanTracker(BaseTracker):
         self.pid_gains = {"p": [0.15, 0.3, 0.1], "i": [0.1, 0.3, 0.01], "d": [0.2, 0.3, 0.1]}
         self.vertical_field_of_view = self._get_field_of_view() # in radians
 
-    # pylint: disable=W0221
+    # pylint: disable=[W0221, R0914]
     def track(
         self,
         center: Tuple[int, int],

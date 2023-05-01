@@ -85,7 +85,7 @@ class BaseDetector(ABC):
             _, img, _, _ = self.predict(img)
 
             cv2.putText(
-                img, f"FPS: {fps:.2f}", (10, 30), 
+                img, f"FPS: {fps:.2f}", (10, 30),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2
                 )
             cv2.imshow("Detector", img)

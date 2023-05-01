@@ -1,3 +1,4 @@
+"""Module containing helper functions and classes for application. """
 from .model_scraper import ModelScraper, ModelScraperError
 from .model_downloader import ModelDownloader
 from .file_handlers import ModelsHandler, SettingsHandler, SettingsKeys

@@ -1,23 +1,10 @@
 """Module for the FaceTracker class."""
 
-from dataclasses import dataclass
-from typing import Tuple, TYPE_CHECKING
+from typing import Tuple
 
 import numpy as np
 
-from .base_tracker import BaseTracker
-
-
-@dataclass
-class TrackerValues:
-    """Dataclass for storing values used in tracking."""
-
-    current_error_x: int
-    current_error_y: int
-    current_error_z: int
-    forward_backward_velocity: int
-    up_down_velocity: int
-    yaw_velocity: int
+from .base_tracker import BaseTracker, TrackerValues
 
 
 # pylint: disable=R0903
